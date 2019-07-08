@@ -7,13 +7,22 @@ namespace Bsii.Dotnet.Utils
 {
     public static class AsyncUtils
     {
+        /// <summary>
+        /// Transforms the enumerable object in parallel
+        /// </summary>
+        /// <typeparam name="TIn">The input type</typeparam>
+        /// <typeparam name="TOut">The output type</typeparam>
+        /// <param name="data">The input vector</param>
+        /// <param name="transform">Transform function</param>
+        /// <param name="exceptionFallbackTransform">Fallback transform function in case of exception, if not specified - using default of <see cref="TOut"></see></param>
+        /// <param name="maxDegreeOfParallelism">Maximum degree of parallelism, if not specified, using <see cref="Environment.ProcessorCount"/></param>
+        /// <returns></returns>
         public static async Task<List<TOut>> ParallelTransform<TIn, TOut>
         (
-            IEnumerable<TIn> data,
+            this IEnumerable<TIn> data,
             Func<TIn, Task<TOut>> transform,
-            int? maxDegreeOfParallelism = null,
-            Action<Exception> exceptionLogger = null
-        )
+            Func<Exception, TIn, Task<TOut>> exceptionFallbackTransform = null,
+            int? maxDegreeOfParallelism = null)
         {
             async Task<TOut> WrappedTransform(TIn i)
             {
@@ -23,7 +32,11 @@ namespace Bsii.Dotnet.Utils
                 }
                 catch (Exception ex)
                 {
-                    exceptionLogger?.Invoke(ex);
+                    if (exceptionFallbackTransform != null)
+                    {
+                        return await exceptionFallbackTransform(ex, i);
+                    }
+
                     return default(TOut);
                 }
             }
@@ -35,7 +48,7 @@ namespace Bsii.Dotnet.Utils
                     MaxDegreeOfParallelism = maxDegreeOfParallelism ?? Environment.ProcessorCount
                 });
 
-            int nPosted = 0;
+            var nPosted = 0;
             foreach (var d in data)
             {
                 if (tb.Post(d))
@@ -43,6 +56,7 @@ namespace Bsii.Dotnet.Utils
                     nPosted++;
                 }
             }
+
             tb.Complete();
 
             var res = new List<TOut>();
@@ -53,13 +67,12 @@ namespace Bsii.Dotnet.Utils
                 {
                     res.Add(r);
                 }
-
             }
 
             await tb.Completion;
             return res;
         }
-        
+
         /// <summary>
         ///     Awaits on 2 tasks in parallel and returns the results
         /// </summary>
@@ -115,17 +128,20 @@ namespace Bsii.Dotnet.Utils
             Task<T2> t2, Task<T3> t3, Task<T4> t4, Task<T5> t5, Task<T6> t6, Task<T7> t7)
         {
             await Task.WhenAll(t1, t2, t3, t4, t5, t6, t7);
-            return new Tuple<T1, T2, T3, T4, T5, T6, T7>(t1.Result, t2.Result, t3.Result, t4.Result, t5.Result, t6.Result, t7.Result);
+            return new Tuple<T1, T2, T3, T4, T5, T6, T7>(t1.Result, t2.Result, t3.Result, t4.Result, t5.Result,
+                t6.Result, t7.Result);
         }
 
         /// <summary>
         ///     Awaits on 8 tasks in parallel and returns the results
         /// </summary>
-        public static async Task<Tuple<T1, T2, T3, T4, T5, T6, T7, T8>> ResolveAll<T1, T2, T3, T4, T5, T6, T7, T8>(Task<T1> t1,
+        public static async Task<Tuple<T1, T2, T3, T4, T5, T6, T7, T8>> ResolveAll<T1, T2, T3, T4, T5, T6, T7, T8>(
+            Task<T1> t1,
             Task<T2> t2, Task<T3> t3, Task<T4> t4, Task<T5> t5, Task<T6> t6, Task<T7> t7, Task<T8> t8)
         {
             await Task.WhenAll(t1, t2, t3, t4, t5, t6, t7, t8);
-            return new Tuple<T1, T2, T3, T4, T5, T6, T7, T8>(t1.Result, t2.Result, t3.Result, t4.Result, t5.Result, t6.Result, t7.Result, t8.Result);
+            return new Tuple<T1, T2, T3, T4, T5, T6, T7, T8>(t1.Result, t2.Result, t3.Result, t4.Result, t5.Result,
+                t6.Result, t7.Result, t8.Result);
         }
     }
 }
