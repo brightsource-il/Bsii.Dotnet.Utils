@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bsii.Dotnet.Utils
 {
-    public static class ProcessUtils
+    public static class ProcessExtensions
     {
         public static async Task<ProcessRunOutput> RunAsyncWithStandardStreamCapture(
             this Process process, TimeSpan? timeOut = null, Action<Process> afterProcessStart = null)

@@ -11,8 +11,7 @@ namespace Bsii.Dotnet.Utils
         (
             IEnumerable<TIn> data,
             Func<TIn, Task<TOut>> transform,
-            int maxDegreeOfParallelism,
-            string description,
+            int? maxDegreeOfParallelism = null,
             Action<Exception> exceptionLogger = null
         )
         {
@@ -33,7 +32,7 @@ namespace Bsii.Dotnet.Utils
                 (Func<TIn, Task<TOut>>) WrappedTransform,
                 new ExecutionDataflowBlockOptions
                 {
-                    MaxDegreeOfParallelism = maxDegreeOfParallelism
+                    MaxDegreeOfParallelism = maxDegreeOfParallelism ?? Environment.ProcessorCount
                 });
 
             int nPosted = 0;
