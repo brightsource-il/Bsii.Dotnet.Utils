@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Bsii.Dotnet.Utils
 {
-    public static class PathUtils
+    public static class EnvironmentUtils
     {
         /// <summary>
         /// Try to find one of the given file names in one of the paths defined in the PATH environment variable
