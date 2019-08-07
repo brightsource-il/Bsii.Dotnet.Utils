@@ -2,6 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>BirghtSource Energy Israel</Authors>
+    <Copyright>BirghtSource Energy Israel</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/brightsource-il/Bsii.Dotnet.Utils</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/brightsource-il/Bsii.Dotnet.Utils</RepositoryUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
