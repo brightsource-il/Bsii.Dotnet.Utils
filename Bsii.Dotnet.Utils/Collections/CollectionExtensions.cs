@@ -753,7 +753,7 @@ namespace Bsii.Dotnet.Utils.Collections
             }
         }
 
-        public static IDisposable AsDisposable<T>(this ICollection<T> collectionIn)
+        public static IDisposable AsDisposable<T>(this IEnumerable<T> collectionIn)
             where T : IDisposable
         {
             return new DisposableAction(() =>
@@ -778,8 +778,8 @@ namespace Bsii.Dotnet.Utils.Collections
             });
         }
 
-        public static IDisposable AsDisposable<T>(this ICollection<T> collectionIn, out ICollection<T> collectionOut)
-            where T : IDisposable
+        public static IDisposable AsDisposable<T>(this T collectionIn, out T collectionOut)
+            where T : IEnumerable<IDisposable>
         {
             collectionOut = collectionIn;
             return AsDisposable(collectionIn);
