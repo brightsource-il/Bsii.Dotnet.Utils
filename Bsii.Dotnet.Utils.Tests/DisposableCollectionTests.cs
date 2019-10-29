@@ -41,7 +41,7 @@ namespace Bsii.Dotnet.Utils.Tests
 
 
         [Fact]
-        public void TestAsDisposableLazyAdditionWithOutParameter()
+        public void TestAsDisposableDisposeOfDeferredAdditions()
         {
             var disposedCount = 0;
             using (new List<DisposableAction>().AsDisposable(out var disposableActionsList))
