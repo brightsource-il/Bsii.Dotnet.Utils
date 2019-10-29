@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Bsii.Dotnet.Utils.Collections;
 using Xunit;
 
@@ -36,6 +37,26 @@ namespace Bsii.Dotnet.Utils.Tests
             }
 
             Assert.Equal(3, disposedCount);
+        }
+
+        [Fact]
+        public void TestContinueOnException()
+        {
+            var disposedCount = 0;
+            Assert.Throws<AggregateException>(() =>
+            {
+                using (new List<DisposableAction>
+                {
+                    new DisposableAction(() => disposedCount++),
+                    new DisposableAction(() => throw new ArgumentException()),
+                    new DisposableAction(() => disposedCount++)
+                }.AsDisposable(out var disposableActionsList))
+                {
+                    Assert.Equal(3, disposableActionsList.Count);
+                    Assert.Equal(0, disposedCount);
+                }
+            });
+            Assert.Equal(2, disposedCount);
         }
     }
 }
