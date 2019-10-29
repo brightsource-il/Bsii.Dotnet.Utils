@@ -753,19 +753,32 @@ namespace Bsii.Dotnet.Utils.Collections
             }
         }
 
-        public static IDisposable AsDisposable<T>(this ICollection<T> collectionIn) 
+        public static IDisposable AsDisposable<T>(this ICollection<T> collectionIn)
             where T : IDisposable
         {
             return new DisposableAction(() =>
             {
+                var exceptions = new List<Exception>();
                 foreach (var i in collectionIn)
                 {
-                    i.Dispose();
+                    try
+                    {
+                        i.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        exceptions.Add(ex);
+                    }
+                }
+
+                if (exceptions.Count > 0)
+                {
+                    throw new AggregateException(exceptions);
                 }
             });
         }
 
-        public static IDisposable AsDisposable<T>(this ICollection<T> collectionIn, out ICollection<T> collectionOut) 
+        public static IDisposable AsDisposable<T>(this ICollection<T> collectionIn, out ICollection<T> collectionOut)
             where T : IDisposable
         {
             collectionOut = collectionIn;
