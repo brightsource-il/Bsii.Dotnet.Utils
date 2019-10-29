@@ -752,5 +752,25 @@ namespace Bsii.Dotnet.Utils.Collections
                 }
             }
         }
+
+        public static IDisposable AsDisposable<T>(this ICollection<T> collectionIn) 
+            where T : IDisposable
+        {
+            return new DisposableAction(() =>
+            {
+                foreach (var i in collectionIn)
+                {
+                    i.Dispose();
+                }
+            });
+        }
+
+        public static IDisposable AsDisposable<T>(this ICollection<T> collectionIn, out ICollection<T> collectionOut) 
+            where T : IDisposable
+        {
+            collectionOut = collectionIn;
+            return AsDisposable(collectionIn);
+        }
+
     }
 }
