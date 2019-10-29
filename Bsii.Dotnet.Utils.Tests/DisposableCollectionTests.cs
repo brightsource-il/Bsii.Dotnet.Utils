@@ -39,6 +39,26 @@ namespace Bsii.Dotnet.Utils.Tests
             Assert.Equal(3, disposedCount);
         }
 
+
+        [Fact]
+        public void TestAsDisposableLazyAdditionWithOutParameter()
+        {
+            var disposedCount = 0;
+            using (new List<DisposableAction>().AsDisposable(out var disposableActionsList))
+            {
+                disposableActionsList.AddRange(new []
+                {
+                    new DisposableAction(() => disposedCount++),
+                    new DisposableAction(() => disposedCount++),
+                    new DisposableAction(() => disposedCount++)
+                });
+                Assert.Equal(3, disposableActionsList.Count);
+                Assert.Equal(0, disposedCount);
+            }
+
+            Assert.Equal(3, disposedCount);
+        }
+
         [Fact]
         public void TestContinueOnException()
         {
