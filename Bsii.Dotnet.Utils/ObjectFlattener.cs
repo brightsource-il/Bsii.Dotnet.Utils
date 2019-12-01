@@ -37,7 +37,7 @@ namespace Bsii.Dotnet.Utils
             /// <summary>
             /// The path separator to use when computing value's path
             /// </summary>
-            public char PropertyPathSeparator { get; set; }= '.';
+            public char PropertyPathSeparator { get; set; } = '.';
         }
 
         /// <summary>
