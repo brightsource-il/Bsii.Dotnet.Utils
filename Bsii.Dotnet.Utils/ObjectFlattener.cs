@@ -33,6 +33,11 @@ namespace Bsii.Dotnet.Utils
             /// The threshold after which enumerable elements are discarded (default=0 - enumerable properties are skipped)
             /// </summary>
             public int MaxElementsInEnumerable { get; set; } = 0;
+
+            /// <summary>
+            /// The path separator to use when computing value's path
+            /// </summary>
+            public char PropertyPathSeparator { get; set; }= '.';
         }
 
         /// <summary>
@@ -107,7 +112,7 @@ namespace Bsii.Dotnet.Utils
                 onData(prefix ?? string.Empty, val);
                 return;
             }
-            prefix = prefix == null ? "" : (prefix + ".");
+            prefix = prefix == null ? "" : (prefix + options.PropertyPathSeparator);
             switch (val)
             {
                 case IDictionary valDictionary:

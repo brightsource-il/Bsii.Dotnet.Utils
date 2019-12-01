@@ -49,12 +49,14 @@ namespace Bsii.Dotnet.Utils.Tests
             {
                 CustomConverters = new Dictionary<Type, Func<object, object>> { [typeof(Vector3d)] = o => null },
                 MaxElementsInEnumerable = 100,
-                ShouldFlattenDictionaries = false
+                ShouldFlattenDictionaries = false,
+                PropertyPathSeparator = '|'
             });
             Assert.Equal(8, res.Count);
-            Assert.Contains("array.0", res.Keys);
-            Assert.DoesNotContain("dictComplex.kx.X", res.Keys);
-            Assert.Equal(3, res["array.2"]);
+            Assert.Contains("array|0", res.Keys);
+            Assert.DoesNotContain("dictComplex|kx|X", res.Keys);
+            Assert.Equal(3, res["array|2"]);
+
         }
 
         #region helper classes
