@@ -8,10 +8,9 @@
     <PackageProjectUrl>https://github.com/brightsource-il/Bsii.Dotnet.Utils</PackageProjectUrl>
     <RepositoryUrl>https://github.com/brightsource-il/Bsii.Dotnet.Utils</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>1.0.3</Version>
-    <AssemblyVersion>1.0.3.0</AssemblyVersion>
-    <FileVersion>1.0.3.0</FileVersion>
+    <Version>1.0.4</Version>
     <Company>BrightSource Energy Israel</Company>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
