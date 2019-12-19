@@ -12,10 +12,11 @@ namespace Bsii.Dotnet.Utils.Reflection
         public static void FillObject(object instance, MemberValueResolver valueResolver,
             ICollection<string> propertyPaths, string propertyPathSeparator = ".")
         {
+            var rootTypeAccessor = TypeAccessor.Create(instance.GetType(), false);
             foreach (var property in propertyPaths)
             {
                 var propertyPath = property.Split(new[] { propertyPathSeparator }, StringSplitOptions.RemoveEmptyEntries);
-                var accessor = TypeAccessor.Create(instance.GetType(), false);
+                var accessor = rootTypeAccessor;
                 var currentValue = instance;
                 foreach (var path in propertyPath.Take(propertyPath.Length - 1))
                 {
