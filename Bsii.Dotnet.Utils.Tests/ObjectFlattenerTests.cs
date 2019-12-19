@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Bsii.Dotnet.Utils.Reflection;
 using Xunit;
 
 namespace Bsii.Dotnet.Utils.Tests

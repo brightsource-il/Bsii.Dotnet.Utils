@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using FastMember;
 
-namespace Bsii.Dotnet.Utils
+namespace Bsii.Dotnet.Utils.Reflection
 {
     /// <summary>
     /// </summary>
