@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
+using System.Threading;
 using FastMember;
 
 namespace Bsii.Dotnet.Utils.Reflection
 {
     /// <summary>
     /// </summary>
-    public class ObjectFlattener
+    public static class ObjectFlattener
     {
+        private static Options DefaultOptions { get; } = new Options();
+        private static ThreadLocal<StringBuilder> StringBuilderTls = new ThreadLocal<StringBuilder>(() => new StringBuilder());
+
         /// <summary>
         /// 
         /// </summary>
@@ -19,11 +24,12 @@ namespace Bsii.Dotnet.Utils.Reflection
             public bool ShouldFlattenDictionaries { get; set; } = true;
             /// <summary>
             /// </summary>
-            public Func<Type, bool> IsPrimitivePredicate { get; set; } = ObjectFlattener.IsTerminalType;
+            public Func<Type, bool> IsPrimitivePredicate { get; set; } = IsTerminalType;
             /// <summary>
             /// In case the flattener encounters a type from this map - it will invoke the corresponding convert function prior to flattening the value. 
             /// </summary>
             public Dictionary<Type, Func<object, object>> CustomConverters { get; set; } = null;
+
             /// <summary>
             /// The maximum depth of nested properties to attempt flattening
             /// </summary>
@@ -79,10 +85,12 @@ namespace Bsii.Dotnet.Utils.Reflection
         /// <param name="options"></param>
         public static void Flatten(object value, Type type, Action<string, object> onData, Options options = null)
         {
-            Flatten(null, value, type, onData, options ?? new Options(), 0);
+            var sb = StringBuilderTls.Value;
+            sb.Clear();
+            Flatten(StringBuilderTls.Value, value, type, onData, options ?? DefaultOptions, 0);
         }
 
-        private static void Flatten(string prefix, object val, Type valueType, Action<string, object> onData, Options options, int currentRecursionLevel)
+        private static void Flatten(StringBuilder paths, object val, Type valueType, Action<string, object> onData, Options options, int currentRecursionLevel)
         {
             if (val == null)
             {
@@ -97,7 +105,7 @@ namespace Bsii.Dotnet.Utils.Reflection
                 {
                     return;
                 }
-                Flatten(prefix, val, val.GetType(), onData, options, currentRecursionLevel);
+                Flatten(paths, val, val.GetType(), onData, options, currentRecursionLevel);
                 return;
             }
 
@@ -109,10 +117,13 @@ namespace Bsii.Dotnet.Utils.Reflection
 
             if (options.IsPrimitivePredicate(valueType))
             {
-                onData(prefix ?? string.Empty, val);
+                onData(paths.ToString(), val);
                 return;
             }
-            prefix = prefix == null ? "" : (prefix + options.PropertyPathSeparator);
+            if (paths.Length > 0)
+            {
+                paths.Append(options.PropertyPathSeparator);
+            }
             switch (val)
             {
                 case IDictionary valDictionary:
@@ -125,9 +136,11 @@ namespace Bsii.Dotnet.Utils.Reflection
                                 {
                                     continue;
                                 }
-
-                                Flatten(prefix + token.Key, token.Value, token.Value.GetType(), onData,
+                                var prevLen = paths.Length;
+                                paths.Append(token.Key);
+                                Flatten(paths, token.Value, token.Value.GetType(), onData,
                                     options, currentRecursionLevel);
+                                paths.Length = prevLen;
                             }
                         }
 
@@ -148,9 +161,11 @@ namespace Bsii.Dotnet.Utils.Reflection
                             {
                                 continue;
                             }
-
-                            Flatten(prefix + i++, token, token.GetType(), onData, options,
+                            var prevLen = paths.Length;
+                            paths.Append(i++);
+                            Flatten(paths, token, token.GetType(), onData, options,
                                 currentRecursionLevel);
+                            paths.Length = prevLen;
                         }
 
                         return;
@@ -172,7 +187,10 @@ namespace Bsii.Dotnet.Utils.Reflection
                 var value = accessor[val, member.Name];
                 if (value != null)
                 {
-                    Flatten(prefix + member.Name, value, member.Type, onData, options, currentRecursionLevel);
+                    var prevLen = paths.Length;
+                    paths.Append(member.Name);
+                    Flatten(paths, value, member.Type, onData, options, currentRecursionLevel);
+                    paths.Length = prevLen;
                 }
             }
 
