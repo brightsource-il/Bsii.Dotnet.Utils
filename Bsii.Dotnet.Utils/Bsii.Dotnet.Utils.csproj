@@ -8,9 +8,14 @@
     <PackageProjectUrl>https://github.com/brightsource-il/Bsii.Dotnet.Utils</PackageProjectUrl>
     <RepositoryUrl>https://github.com/brightsource-il/Bsii.Dotnet.Utils</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>1.0.5</Version>
+    <Version>1.0.6</Version>
     <Company>BrightSource Energy Israel</Company>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
