@@ -143,5 +143,17 @@ namespace Bsii.Dotnet.Utils
             return new Tuple<T1, T2, T3, T4, T5, T6, T7, T8>(t1.Result, t2.Result, t3.Result, t4.Result, t5.Result,
                 t6.Result, t7.Result, t8.Result);
         }
+
+        /// <summary>
+        /// A shorthand for task.ConfigureAwait(false).GetAwaiter().GetResult()
+        /// </summary>
+        public static void WaitContextless(this Task task) => 
+            task.ConfigureAwait(false).GetAwaiter().GetResult();
+
+        /// <summary>
+        /// A shorthand for task.ConfigureAwait(false).GetAwaiter().GetResult()
+        /// </summary>
+        public static T GetResultContextless<T>(this Task<T> task) => 
+            task.ConfigureAwait(false).GetAwaiter().GetResult();
     }
 }
