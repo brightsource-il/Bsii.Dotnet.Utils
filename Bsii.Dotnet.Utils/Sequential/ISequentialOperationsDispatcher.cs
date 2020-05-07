@@ -13,6 +13,7 @@ namespace Bsii.Dotnet.Utils.Sequential
 
         /// <summary>
         /// Executes an async action which generates a result value, guarantees no other dispatches runs in parallel with it
+        /// This method is thread safe
         /// Note - The dispatching is synchronous and doesn't perform the execution, the returned task is to represent the result
         /// Note - Nested dependent operations will cause deadlocks
         /// </summary>
