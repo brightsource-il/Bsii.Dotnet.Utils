@@ -6,8 +6,9 @@ namespace Bsii.Dotnet.Utils.Sequential
     /// <summary>
     /// Guarantees sequential execution of operations dispatched to it
     /// Note - nested dependent operations will cause deadlocks
+    /// Disposing this will ensure <see cref="StopAsync"/> is called
     /// </summary>
-    public interface ISequentialOperationsDispatcher
+    public interface ISequentialOperationsDispatcher : IDisposable
     {
 
         /// <summary>
