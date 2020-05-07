@@ -77,8 +77,17 @@ namespace Bsii.Dotnet.Utils.Sequential
         }
         #endregion
 
-        private readonly BufferBlock<IDispatchedOperation> _operations = new BufferBlock<IDispatchedOperation>();
+        private readonly BufferBlock<IDispatchedOperation> _operations;
         private bool _isStarted = false;
+
+        /// <summary>
+        /// Creates the dispatcher optionally specifying dataflow block options
+        /// </summary>
+        /// <param name="blockOptions"></param>
+        public BufferBlockSequentialDispatcher(DataflowBlockOptions blockOptions = null)
+        {
+            _operations = new BufferBlock<IDispatchedOperation>(blockOptions ?? new DataflowBlockOptions());
+        }
 
         public Task<T> Dispatch<T>(Func<Task<T>> exec)
         {
