@@ -78,7 +78,7 @@ namespace Bsii.Dotnet.Utils.Sequential
         #endregion
 
         private readonly BufferBlock<IDispatchedOperation> _operations = new BufferBlock<IDispatchedOperation>();
-        private bool _isStarted = false;
+        private bool _isStarted;
 
         public Task<T> Dispatch<T>(Func<Task<T>> exec)
         {

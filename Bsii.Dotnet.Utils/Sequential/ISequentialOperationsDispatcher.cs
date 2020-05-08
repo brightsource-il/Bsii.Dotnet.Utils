@@ -27,7 +27,6 @@ namespace Bsii.Dotnet.Utils.Sequential
         /// Note - The dispatching is synchronous and doesn't perform the execution, the returned task is to represent the result
         /// Note - Nested dependent operations will cause deadlocks
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="exec"></param>
         /// <returns>A task that represents the status of the action execution</returns>
         Task Dispatch(Func<Task> exec);
