@@ -1,5 +1,6 @@
 # Bsii.Dotnet.Utils
-![](https://github.com/brightsource-il/Bsii.Dotnet.Utils/workflows/.NET%20Core/badge.svg)
+
+![](https://github.com/brightsource-il/Bsii.Dotnet.Utils/workflows/.NET%20Core%203.1.100/badge.svg)
 
 .NET Standard 2.0 compatible library that includes commonly used utilities:
 + Collections extensions
