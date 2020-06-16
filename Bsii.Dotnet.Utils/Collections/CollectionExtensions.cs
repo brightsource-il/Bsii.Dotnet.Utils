@@ -753,6 +753,20 @@ namespace Bsii.Dotnet.Utils.Collections
             }
         }
 
+        public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TValue> addValueFactory,
+            Func<TKey, TValue, TValue> updateValueFactory)
+        {
+            if (dictionary.TryGetValue(key, out var value))
+            {
+                var updateValue = updateValueFactory(key, value);
+                dictionary[key] = updateValue;
+                return updateValue;
+            }
+            var addValue = addValueFactory(key);
+            dictionary.Add(key, addValue);
+            return addValue;
+        }
+
         public static IDisposable AsDisposable<T>(this IEnumerable<T> collectionIn)
             where T : IDisposable
         {
