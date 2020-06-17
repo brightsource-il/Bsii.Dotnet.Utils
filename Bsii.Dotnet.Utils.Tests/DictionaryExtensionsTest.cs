@@ -272,11 +272,7 @@ namespace Bsii.Dotnet.Utils.Tests
             var dict = new Dictionary<int, int>();
             Func<int, Task<int>> asyncAddFunc = (key) => Task.FromResult(2);
             var flag = false;
-            Func<int, int, Task> asyncUpdateFunc = (key, value) =>
-            {
-                return Task.Run(() => flag = true);
-                
-            };
+            Func<int, int, Task> asyncUpdateFunc = (key, value) => { return Task.Run(() => flag = true); };
             await dict.AddOrUpdateAsync(1, asyncAddFunc, asyncUpdateFunc);
             Assert.Contains(1, dict.Keys);
             Assert.Equal(2, dict[1]);
@@ -289,14 +285,49 @@ namespace Bsii.Dotnet.Utils.Tests
             var dict = new Dictionary<int, int> {[1] = 2};
             Func<int, Task<int>> asyncAddFunc = (key) => { return new Task<int>(() => 2); };
             var flag = false;
-            Func<int, int, Task> asyncUpdateFunc = (key, value) =>
-            {
-                return Task.Run(() => flag = true);
-
-            }; await dict.AddOrUpdateAsync(1, asyncAddFunc, asyncUpdateFunc);
+            Func<int, int, Task> asyncUpdateFunc = (key, value) => { return Task.Run(() => flag = true); };
+            await dict.AddOrUpdateAsync(1, asyncAddFunc, asyncUpdateFunc);
             Assert.Contains(1, dict.Keys);
             Assert.Equal(2, dict[1]);
             Assert.True(flag);
+        }
+
+        [Fact]
+        public void TestGetOrAddTValueInsertion()
+        {
+            var dict = new Dictionary<int, int> { };
+            dict.GetOrAdd(1, 2);
+            Assert.Contains(1, dict.Keys);
+            Assert.Equal(2, dict[1]);
+        }
+
+        [Fact]
+        public void TestGetOrAddTValueGet()
+        {
+            var dict = new Dictionary<int, int> {[1] = 2};
+            dict.GetOrAdd(1, 3);
+            Assert.Contains(1, dict.Keys);
+            Assert.Equal(2, dict[1]);
+        }
+
+        [Fact]
+        public void TestGetOrAddFactoryTValueInsertion()
+        {
+            var dict = new Dictionary<int, int> { };
+            Func<int, int> addValueFactory = (key) => 2;
+            dict.GetOrAdd(1, addValueFactory);
+            Assert.Contains(1, dict.Keys);
+            Assert.Equal(2, dict[1]);
+        }
+
+        [Fact]
+        public void TestGetOrAddFactoryTValueGet()
+        {
+            var dict = new Dictionary<int, int> {[1] = 2};
+            Func<int, int> addValueFactory = (key) => 2;
+            dict.GetOrAdd(1, addValueFactory);
+            Assert.Contains(1, dict.Keys);
+            Assert.Equal(2, dict[1]);
         }
     }
 }
