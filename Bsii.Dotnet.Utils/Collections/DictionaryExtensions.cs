@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace Bsii.Dotnet.Utils.Collections
@@ -116,5 +117,29 @@ namespace Bsii.Dotnet.Utils.Collections
             dictionary.Add(key, addValue);
             return addValue;
         }
+
+        public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue valueToAdd)
+        {
+            if (dictionary.TryGetValue(key, out var value))
+            {
+                return value;
+            }
+
+            dictionary[key] = valueToAdd;
+            return valueToAdd;
+        }
+
+        public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TValue> addValueFactory)
+        {
+            if (dictionary.TryGetValue(key, out var value))
+            {
+                return value;
+            }
+            var valueToAdd = addValueFactory(key);
+            dictionary[key] = valueToAdd;
+            return valueToAdd;
+        }
+        
+        
     }
 }
