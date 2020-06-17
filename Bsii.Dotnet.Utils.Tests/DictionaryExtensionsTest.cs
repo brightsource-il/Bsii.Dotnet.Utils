@@ -270,9 +270,13 @@ namespace Bsii.Dotnet.Utils.Tests
         public async void TestAddFactoryUpdateFactoryInsertionAsync()
         {
             var dict = new Dictionary<int, int>();
-            Func<int, Task<int>> asyncAddFunc = (key) => { return new Task<int>(() => 2); };
-            bool flag = false;
-            Func<int, int, Task> asyncUpdateFunc = (key, value) => { return new Task(() => { flag = true; }); };
+            Func<int, Task<int>> asyncAddFunc = (key) => Task.FromResult(2);
+            var flag = false;
+            Func<int, int, Task> asyncUpdateFunc = (key, value) =>
+            {
+                return Task.Run(() => flag = true);
+                
+            };
             await dict.AddOrUpdateAsync(1, asyncAddFunc, asyncUpdateFunc);
             Assert.Contains(1, dict.Keys);
             Assert.Equal(2, dict[1]);
@@ -284,11 +288,14 @@ namespace Bsii.Dotnet.Utils.Tests
         {
             var dict = new Dictionary<int, int> {[1] = 2};
             Func<int, Task<int>> asyncAddFunc = (key) => { return new Task<int>(() => 2); };
-            bool flag = false;
-            Func<int, int, Task> asyncUpdateFunc = (key, value) => { return new Task(() => { flag = true; }); };
-            await dict.AddOrUpdateAsync(1, asyncAddFunc, asyncUpdateFunc);
+            var flag = false;
+            Func<int, int, Task> asyncUpdateFunc = (key, value) =>
+            {
+                return Task.Run(() => flag = true);
+
+            }; await dict.AddOrUpdateAsync(1, asyncAddFunc, asyncUpdateFunc);
             Assert.Contains(1, dict.Keys);
-            Assert.Equal(3, dict[1]);
+            Assert.Equal(2, dict[1]);
             Assert.True(flag);
         }
     }

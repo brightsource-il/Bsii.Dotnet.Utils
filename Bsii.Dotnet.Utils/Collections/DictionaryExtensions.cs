@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Bsii.Dotnet.Utils.Collections
@@ -23,7 +22,8 @@ namespace Bsii.Dotnet.Utils.Collections
             return addValue;
         }
 
-        public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, TValue addValue,
+        public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
+            TValue addValue,
             TValue updateValue)
         {
             if (dictionary.ContainsKey(key))
@@ -36,7 +36,7 @@ namespace Bsii.Dotnet.Utils.Collections
             return addValue;
         }
 
-        public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, 
+        public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary,
             TKey key, Func<TKey, TValue> addValueFactory, TValue updateValue)
         {
             if (dictionary.ContainsKey(key))
@@ -50,7 +50,8 @@ namespace Bsii.Dotnet.Utils.Collections
             return addedValue;
         }
 
-        public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, TValue addValue,
+        public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
+            TValue addValue,
             Func<TKey, TValue, TValue> updateValueFactory)
         {
             if (dictionary.TryGetValue(key, out var valueToUpdate))
@@ -80,17 +81,28 @@ namespace Bsii.Dotnet.Utils.Collections
                 updateAction(key, value);
                 return value;
             }
+
             var addValue = addValueFactory(key);
             dictionary.Add(key, addValue);
             return addValue;
         }
 
-        public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey addKey, TValue addValue,
+        public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
+            TValue addValue,
             Action<TKey, TValue> updateAction)
         {
-            return dictionary.AddOrUpdate(addKey, (key) => addValue, updateAction);
+            if (dictionary.TryGetValue(key, out var valueToUpdate))
+            {
+                updateAction(key, valueToUpdate);
+                return valueToUpdate;
+            }
+
+            dictionary.Add(key, addValue);
+            return addValue;
         }
-        public static async Task<TValue> AddOrUpdateAsync<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
+
+        public static async Task<TValue> AddOrUpdateAsync<TKey, TValue>(this Dictionary<TKey, TValue> dictionary,
+            TKey key,
             Func<TKey, Task<TValue>> addValueFactory,
             Func<TKey, TValue, Task> updateValueFactory)
         {
@@ -99,10 +111,10 @@ namespace Bsii.Dotnet.Utils.Collections
                 await updateValueFactory(key, value);
                 return value;
             }
+
             var addValue = await addValueFactory(key);
             dictionary.Add(key, addValue);
             return addValue;
         }
     }
-
 }
