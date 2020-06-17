@@ -1,21 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 using Bsii.Dotnet.Utils.Collections;
 using Xunit;
 
 namespace Bsii.Dotnet.Utils.Tests
 {
-    // TODO: Extensions to test
-    // done - this Dictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TValue> addValueFactory, Func<TKey, TValue, TValue> updateValueFactory
-    // done - this Dictionary<TKey, TValue> dictionary, TKey addKey, TValue addValue, TValue updateValue
-    // done - this Dictionary<TKey, TValue> dictionary, TKey addKey, Func<TKey, TValue> addValueFactory, TValue updateValue
-    // done - this Dictionary<TKey, TValue> dictionary, TKey key, TValue addValue, Func<TKey, TValue, TValue> updateValueFactory
-    // done - this Dictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TValue> addValueFactory, Action<TKey, TValue> updateAction
-    // done - this Dictionary<TKey, TValue> dictionary, TKey addKey, TValue addValue, Action<TKey, TValue> updateAction
-    // this Dictionary<TKey, TValue> dictionary, TKey key, Func<TKey, Task<TValue>> addValueFactory, Func<TKey, TValue, Task> updateValueFactory
-
     public class DictionaryExtensionsTest
     {
         class TestClass
@@ -295,7 +285,7 @@ namespace Bsii.Dotnet.Utils.Tests
         [Fact]
         public void TestGetOrAddTValueInsertion()
         {
-            var dict = new Dictionary<int, int> { };
+            var dict = new Dictionary<int, int>();
             dict.GetOrAdd(1, 2);
             Assert.Contains(1, dict.Keys);
             Assert.Equal(2, dict[1]);
@@ -313,7 +303,7 @@ namespace Bsii.Dotnet.Utils.Tests
         [Fact]
         public void TestGetOrAddFactoryTValueInsertion()
         {
-            var dict = new Dictionary<int, int> { };
+            var dict = new Dictionary<int, int>();
             Func<int, int> addValueFactory = (key) => 2;
             dict.GetOrAdd(1, addValueFactory);
             Assert.Contains(1, dict.Keys);
