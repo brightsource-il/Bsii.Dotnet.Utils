@@ -1,12 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace Bsii.Dotnet.Utils.Collections
 {
     public static class DictionaryExtensions
     {
+        /// <summary>
+        /// Adds or updates a value in a dictionary. If the key exists it calls the updateValueFactory and updates the value, else it inserts a new value from addValueFactory
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="key"></param>
+        /// <param name="addValueFactory"></param>
+        /// <param name="updateValueFactory"></param>
+        /// <returns></returns>
         public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
             Func<TKey, TValue> addValueFactory,
             Func<TKey, TValue, TValue> updateValueFactory)
@@ -23,6 +32,16 @@ namespace Bsii.Dotnet.Utils.Collections
             return addValue;
         }
 
+        /// <summary>
+        /// Adds or updates a value in a dictionary. If the key exists it updates the value to updateValue, else it inserts to dictionary with value = addValue
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="key"></param>
+        /// <param name="addValue"></param>
+        /// <param name="updateValue"></param>
+        /// <returns></returns>
         public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
             TValue addValue,
             TValue updateValue)
@@ -37,6 +56,16 @@ namespace Bsii.Dotnet.Utils.Collections
             return addValue;
         }
 
+        /// <summary>
+        /// Adds or updates a value in a dictionary. If the key exists it updates the value to updateValue, else it inserts a new value from addValueFactory
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="key"></param>
+        /// <param name="addValueFactory"></param>
+        /// <param name="updateValue"></param>
+        /// <returns></returns>
         public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary,
             TKey key, Func<TKey, TValue> addValueFactory, TValue updateValue)
         {
@@ -51,6 +80,16 @@ namespace Bsii.Dotnet.Utils.Collections
             return addedValue;
         }
 
+        /// <summary>
+        /// Adds or updates a value in a dictionary. If the key exists it calls the updateValueFactory and updates the value, else it inserts to dictionary with value = addValue
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="key"></param>
+        /// <param name="addValue"></param>
+        /// <param name="updateValueFactory"></param>
+        /// <returns></returns>
         public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
             TValue addValue,
             Func<TKey, TValue, TValue> updateValueFactory)
@@ -72,7 +111,17 @@ namespace Bsii.Dotnet.Utils.Collections
             return addValue;
         }
 
-
+        /// <summary>
+        /// Adds or updates a value in a dictionary. If the key exists it calls the updateAction with key and ref to value and thn returns value,
+        ///  else it inserts a new value from addValueFactory
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="key"></param>
+        /// <param name="addValueFactory"></param>
+        /// <param name="updateAction"></param>
+        /// <returns></returns>
         public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
             Func<TKey, TValue> addValueFactory,
             Action<TKey, TValue> updateAction)
@@ -88,6 +137,16 @@ namespace Bsii.Dotnet.Utils.Collections
             return addValue;
         }
 
+        /// <summary>
+        /// Adds or updates a value in a dictionary. If the key exists it calls the updateAction with key and ref to value and thn returns value,else it inserts to dictionary with value = addValue
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="key"></param>
+        /// <param name="addValue"></param>
+        /// <param name="updateAction"></param>
+        /// <returns></returns>
         public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
             TValue addValue,
             Action<TKey, TValue> updateAction)
@@ -102,6 +161,16 @@ namespace Bsii.Dotnet.Utils.Collections
             return addValue;
         }
 
+        /// <summary>
+        /// Async Adds or updates a value in a dictionary. If the key exists it calls the async updateValueFactory and updates the value, else it inserts a new value from async addValueFactory
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="key"></param>
+        /// <param name="addValueFactory"></param>
+        /// <param name="updateValueFactory"></param>
+        /// <returns></returns>
         public static async Task<TValue> AddOrUpdateAsync<TKey, TValue>(this Dictionary<TKey, TValue> dictionary,
             TKey key,
             Func<TKey, Task<TValue>> addValueFactory,
@@ -118,7 +187,17 @@ namespace Bsii.Dotnet.Utils.Collections
             return addValue;
         }
 
-        public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue valueToAdd)
+        /// <summary>
+        /// Gets or Adds value to dictionary. If the key exists it returns it from the dictionary, else insert to dictionary with value=valueToAdd
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="key"></param>
+        /// <param name="valueToAdd"></param>
+        /// <returns></returns>
+        public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key,
+            TValue valueToAdd)
         {
             if (dictionary.TryGetValue(key, out var value))
             {
@@ -129,17 +208,26 @@ namespace Bsii.Dotnet.Utils.Collections
             return valueToAdd;
         }
 
-        public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TValue> addValueFactory)
+        /// <summary>
+        /// Gets or Adds value to dictionary. If the key exists it returns it from the dictionary, else it inserts a new value from addValueFactory
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="key"></param>
+        /// <param name="addValueFactory"></param>
+        /// <returns></returns>
+        public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key,
+            Func<TKey, TValue> addValueFactory)
         {
             if (dictionary.TryGetValue(key, out var value))
             {
                 return value;
             }
+
             var valueToAdd = addValueFactory(key);
             dictionary[key] = valueToAdd;
             return valueToAdd;
         }
-        
-        
     }
 }

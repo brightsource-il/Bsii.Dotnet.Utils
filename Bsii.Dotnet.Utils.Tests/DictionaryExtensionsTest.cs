@@ -20,7 +20,6 @@ namespace Bsii.Dotnet.Utils.Tests
 
         private void TestClassUpdateAction(int key, TestClass value) => value.A = 3;
 
-
         [Fact]
         public void TestBasicInsertionPrimitive()
         {
