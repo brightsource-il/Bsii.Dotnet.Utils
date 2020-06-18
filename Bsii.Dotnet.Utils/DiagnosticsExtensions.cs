@@ -6,7 +6,7 @@ namespace Bsii.Dotnet.Utils
     public static class DiagnosticsExtensions
     {
         /// <summary>
-        /// Starts the activity and returns it as disposable that stops it in case of an error.
+        /// Starts the activity and returns it as disposable.
         /// </summary>
         /// <param name="activity"></param>
         /// <returns></returns>
