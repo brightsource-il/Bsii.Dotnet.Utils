@@ -16,7 +16,7 @@ namespace Bsii.Dotnet.Utils.Collections
         /// <param name="addValueFactory"></param>
         /// <param name="updateValueFactory"></param>
         /// <returns></returns>
-        public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
+        public static TValue AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key,
             Func<TKey, TValue> addValueFactory,
             Func<TKey, TValue, TValue> updateValueFactory)
         {
@@ -42,7 +42,7 @@ namespace Bsii.Dotnet.Utils.Collections
         /// <param name="addValue"></param>
         /// <param name="updateValue"></param>
         /// <returns></returns>
-        public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
+        public static TValue AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key,
             TValue addValue,
             TValue updateValue)
         {
@@ -66,7 +66,7 @@ namespace Bsii.Dotnet.Utils.Collections
         /// <param name="addValueFactory"></param>
         /// <param name="updateValue"></param>
         /// <returns></returns>
-        public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary,
+        public static TValue AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary,
             TKey key, Func<TKey, TValue> addValueFactory, TValue updateValue)
         {
             if (dictionary.ContainsKey(key))
@@ -90,7 +90,7 @@ namespace Bsii.Dotnet.Utils.Collections
         /// <param name="addValue"></param>
         /// <param name="updateValueFactory"></param>
         /// <returns></returns>
-        public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
+        public static TValue AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key,
             TValue addValue,
             Func<TKey, TValue, TValue> updateValueFactory)
         {
@@ -122,7 +122,7 @@ namespace Bsii.Dotnet.Utils.Collections
         /// <param name="addValueFactory"></param>
         /// <param name="updateAction"></param>
         /// <returns></returns>
-        public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
+        public static TValue AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key,
             Func<TKey, TValue> addValueFactory,
             Action<TKey, TValue> updateAction)
         {
@@ -147,7 +147,7 @@ namespace Bsii.Dotnet.Utils.Collections
         /// <param name="addValue"></param>
         /// <param name="updateAction"></param>
         /// <returns></returns>
-        public static TValue AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
+        public static TValue AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key,
             TValue addValue,
             Action<TKey, TValue> updateAction)
         {
@@ -171,7 +171,7 @@ namespace Bsii.Dotnet.Utils.Collections
         /// <param name="addValueFactory"></param>
         /// <param name="updateValueFactory"></param>
         /// <returns></returns>
-        public static async Task<TValue> AddOrUpdateAsync<TKey, TValue>(this Dictionary<TKey, TValue> dictionary,
+        public static async Task<TValue> AddOrUpdateAsync<TKey, TValue>(this IDictionary<TKey, TValue> dictionary,
             TKey key,
             Func<TKey, Task<TValue>> addValueFactory,
             Func<TKey, TValue, Task> updateValueFactory)
