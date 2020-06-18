@@ -753,6 +753,7 @@ namespace Bsii.Dotnet.Utils.Collections
             }
         }
 
+
         public static IDisposable AsDisposable<T>(this IEnumerable<T> collectionIn)
             where T : IDisposable
         {
@@ -784,6 +785,5 @@ namespace Bsii.Dotnet.Utils.Collections
             collectionOut = collectionIn;
             return AsDisposable(collectionIn);
         }
-
     }
 }
