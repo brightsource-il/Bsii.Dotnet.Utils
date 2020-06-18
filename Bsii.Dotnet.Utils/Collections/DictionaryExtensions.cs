@@ -26,7 +26,6 @@ namespace Bsii.Dotnet.Utils.Collections
                 dictionary[key] = updateValue;
                 return updateValue;
             }
-
             var addValue = addValueFactory(key);
             dictionary.Add(key, addValue);
             return addValue;
@@ -51,7 +50,6 @@ namespace Bsii.Dotnet.Utils.Collections
                 dictionary[key] = updateValue;
                 return updateValue;
             }
-
             dictionary.Add(key, addValue);
             return addValue;
         }
@@ -74,7 +72,6 @@ namespace Bsii.Dotnet.Utils.Collections
                 dictionary[key] = updateValue;
                 return updateValue;
             }
-
             var addedValue = addValueFactory(key);
             dictionary.Add(key, addedValue);
             return addedValue;
@@ -102,11 +99,9 @@ namespace Bsii.Dotnet.Utils.Collections
                     dictionary[key] = updatedValue;
                     return updatedValue;
                 }
-
                 updateValueFactory(key, valueToUpdate);
                 return valueToUpdate;
             }
-
             dictionary.Add(key, addValue);
             return addValue;
         }
@@ -131,7 +126,6 @@ namespace Bsii.Dotnet.Utils.Collections
                 updateAction(key, value);
                 return value;
             }
-
             var addValue = addValueFactory(key);
             dictionary.Add(key, addValue);
             return addValue;
@@ -156,7 +150,6 @@ namespace Bsii.Dotnet.Utils.Collections
                 updateAction(key, valueToUpdate);
                 return valueToUpdate;
             }
-
             dictionary.Add(key, addValue);
             return addValue;
         }
@@ -181,7 +174,6 @@ namespace Bsii.Dotnet.Utils.Collections
                 await updateValueFactory(key, value);
                 return value;
             }
-
             var addValue = await addValueFactory(key);
             dictionary.Add(key, addValue);
             return addValue;
@@ -203,7 +195,6 @@ namespace Bsii.Dotnet.Utils.Collections
             {
                 return value;
             }
-
             dictionary[key] = valueToAdd;
             return valueToAdd;
         }
@@ -224,7 +215,6 @@ namespace Bsii.Dotnet.Utils.Collections
             {
                 return value;
             }
-
             var valueToAdd = addValueFactory(key);
             dictionary[key] = valueToAdd;
             return valueToAdd;

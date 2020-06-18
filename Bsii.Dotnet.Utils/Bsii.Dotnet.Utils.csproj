@@ -11,12 +11,14 @@
     <Version>1.0.7</Version>
     <Company>BrightSource Energy Israel</Company>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <Description>.NET Standard 2.0 compatible library that includes commonly used utilities:
-+ Collections extensions
-+ Asynchronous work utilities
-+ Process extensions
-+ Objects flattening &amp; filling 
-etc...</Description>
+    <Description>
+      .NET Standard 2.0 compatible library that includes commonly used utilities:
+      + Collections extensions
+      + Asynchronous work utilities
+      + Process extensions
+      + Objects flattening &amp; filling
+      etc...
+    </Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
