@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
@@ -13,6 +14,8 @@ namespace Bsii.Dotnet.Utils.Sequential
         private interface IDispatchedOperation
         {
             Task ExecuteAsync();
+
+            void SetException(Exception ex);
         }
 
         /// <summary>
@@ -44,6 +47,12 @@ namespace Bsii.Dotnet.Utils.Sequential
                     _tcs.SetException(e);
                 }
             }
+
+            public void SetException(Exception ex)
+            {
+                _tcs.SetException(ex);
+            }
+            
         }
 
         /// <summary>
@@ -74,11 +83,26 @@ namespace Bsii.Dotnet.Utils.Sequential
                     _tcs.SetException(e);
                 }
             }
+
+            public void SetException(Exception ex)
+            {
+                _tcs.SetException(ex);
+            }
         }
         #endregion
 
         private readonly BufferBlock<IDispatchedOperation> _operations = new BufferBlock<IDispatchedOperation>();
+        private readonly bool _discardAllButLatest;
         private bool _isStarted;
+
+        /// <summary>
+        /// Ctor
+        /// </summary>
+        /// <param name="discardAllButLatest">if true, only the latest dispatched operation will be invoked, others will be failed with an exception</param>
+        public BufferBlockSequentialDispatcher(bool discardAllButLatest = false)
+        {
+            _discardAllButLatest = discardAllButLatest;
+        }
 
         public Task<T> Dispatch<T>(Func<Task<T>> exec)
         {
@@ -104,8 +128,26 @@ namespace Bsii.Dotnet.Utils.Sequential
         {
             while (await _operations.OutputAvailableAsync())
             {
-                var op = await _operations.ReceiveAsync();
-                await op.ExecuteAsync(); //This is guaranteed not to throw
+                if (_operations.TryReceiveAll(out var operations)) //Else nothing to do, shouldn't happen at all
+                {
+                    if (_discardAllButLatest && operations.Count > 1) //Have multiple operation dispatched, user requested only the latest one to be executed
+                    {
+                        for (int i = 0; i < operations.Count - 1; ++i)
+                        {
+                            var op = operations[i];
+                            op.SetException(new OperationCanceledException($"The operation is cancelled due to {operations.Count - i} operation dispatched to the buffer block after it"));
+                        }
+                        var lastOp = operations.Last();
+                        await lastOp.ExecuteAsync(); //This is guaranteed not to throw
+                    }
+                    else
+                    {
+                        foreach (var op in operations)
+                        {
+                            await op.ExecuteAsync(); //This is guaranteed not to throw
+                        }
+                    }
+                }
             }
         }
 
