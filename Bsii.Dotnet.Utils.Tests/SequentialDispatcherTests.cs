@@ -60,5 +60,32 @@ namespace Bsii.Dotnet.Utils.Tests
             var t3 = dispatcher.Dispatch(async () => await Task.Delay(1)); //async void
             await Task.WhenAll(t1, t2, t3);
         }
+
+        [Fact]
+        public async Task TestOnlyLatestOperationDispatching()
+        {
+            using ISequentialOperationsDispatcher dispatcher = new BufferBlockSequentialDispatcher(true);
+            var t1 = dispatcher.Dispatch(() => Task.Delay(1000));
+            var t2 = dispatcher.Dispatch(() => Task.Delay(1000));
+            var t3 = dispatcher.Dispatch(() => Task.Delay(1000));
+            dispatcher.Start();
+
+            await Assert.ThrowsAsync<OperationCanceledException>(async () => await t1);
+            await Assert.ThrowsAsync<OperationCanceledException>(async () => await t2);
+            await t3; //Should not throw
+
+            ManualResetEvent mre = new ManualResetEvent(false);
+            var t4 = dispatcher.Dispatch(() => 
+            { 
+                mre.Set();
+                return Task.Delay(1000);
+            }) ;
+            mre.WaitOne(); //make sure t4 is running
+            var t5 = dispatcher.Dispatch(() => Task.Delay(1000));
+            var t6 = dispatcher.Dispatch(() => Task.Delay(1000));
+            await t4; //Should not throw
+            await Assert.ThrowsAsync<OperationCanceledException>(async () => await t5);
+            await t6; //Should be the one invoked
+        }
     }
 }
