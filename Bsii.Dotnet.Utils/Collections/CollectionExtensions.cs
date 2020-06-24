@@ -785,5 +785,51 @@ namespace Bsii.Dotnet.Utils.Collections
             collectionOut = collectionIn;
             return AsDisposable(collectionIn);
         }
+
+        /// <summary>
+        /// Searches for the closest element in a sorted list using binary search. Compares elements using the distance function provided
+        /// Assumes the elements have a minus (-) operator that returns a valid result that can be compared for distance
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sortedCollection"></param>
+        /// <param name="element"></param>
+        /// <param name="distanceFunc"></param>
+        /// <returns></returns>
+        public static T FindClosestElement<T>(this List<T> sortedCollection, T element)
+        {
+            if (sortedCollection.Count == 0)
+            {
+                throw new ArgumentException("The provided collection is empty");
+            }
+            if (sortedCollection.Count == 1)
+            {
+                return sortedCollection[0];
+            }
+            var idx = sortedCollection.BinarySearch(element);
+            if (idx >= 0) //An exact match
+            {
+                return sortedCollection[idx];
+            }
+            idx = ~idx;
+            if (idx == sortedCollection.Count)
+            {
+                return sortedCollection[sortedCollection.Count - 1];
+            }
+            if (idx == 0)
+            {
+                return sortedCollection[0];
+            }
+            dynamic larger = sortedCollection[idx]; //Dynamic is needed to allow the diff below
+            dynamic smaller = sortedCollection[idx - 1]; //Dynamic is needed to allow the diff below
+
+            if (larger - element < element - smaller)
+            {
+                return larger;
+            }
+            else
+            {
+                return smaller;
+            }
+        }
     }
 }

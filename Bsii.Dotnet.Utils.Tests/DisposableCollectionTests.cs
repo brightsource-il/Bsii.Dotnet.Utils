@@ -5,6 +5,8 @@ using Xunit;
 
 namespace Bsii.Dotnet.Utils.Tests
 {
+
+
     public class DisposableCollectionTests
     {
         [Fact]
