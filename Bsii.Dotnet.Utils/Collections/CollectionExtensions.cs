@@ -788,14 +788,16 @@ namespace Bsii.Dotnet.Utils.Collections
 
         /// <summary>
         /// Searches for the closest element in an ascending- sorted list using binary search. Compares elements using the distance function provided
-        /// Assumes the elements have a minus (-) operator that returns a valid result that can be compared for distance
+        /// Assumes the elements have a minus (-) operator that returns a valid result that can be compared for distance if NearestNeighbour is specified
+        /// For cases the query element is below the lowest or above the highest value, the function returns the respective border element in any case
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sortedCollection"></param>
         /// <param name="element"></param>
         /// <param name="distanceFunc"></param>
+        /// <param name="comparison"></param>
         /// <returns></returns>
-        public static T FindClosestElement<T>(this List<T> sortedCollection, T element)
+        public static T FindClosestElement<T>(this List<T> sortedCollection, T element, ComparisonOptions comparison = ComparisonOptions.NearestNeighbour)
         {
             if (sortedCollection.Count == 0)
             {
@@ -819,16 +821,26 @@ namespace Bsii.Dotnet.Utils.Collections
             {
                 return sortedCollection[0];
             }
-            dynamic larger = sortedCollection[idx]; //Dynamic is needed to allow the diff below
-            dynamic smaller = sortedCollection[idx - 1]; //Dynamic is needed to allow the diff below
 
-            if (larger - element < element - smaller)
+            switch (comparison)
             {
-                return larger;
-            }
-            else
-            {
-                return smaller;
+                case ComparisonOptions.NearestNeighbour:
+                    dynamic larger = sortedCollection[idx]; //Dynamic is needed to allow the diff below
+                    dynamic smaller = sortedCollection[idx - 1]; //Dynamic is needed to allow the diff below
+                    if (larger - element < element - smaller)
+                    {
+                        return larger;
+                    }
+                    else
+                    {
+                        return smaller;
+                    }
+                case ComparisonOptions.LeftNeigbour:
+                    return sortedCollection[idx - 1];
+                case ComparisonOptions.RightNeighbour:
+                    return sortedCollection[idx];
+                default:
+                    throw new NotImplementedException($"The specified value comparison option '{comparison}' is not implemented");
             }
         }
     }
