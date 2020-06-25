@@ -787,7 +787,7 @@ namespace Bsii.Dotnet.Utils.Collections
         }
 
         /// <summary>
-        /// Searches for the closest element in a sorted list using binary search. Compares elements using the distance function provided
+        /// Searches for the closest element in an ascending- sorted list using binary search. Compares elements using the distance function provided
         /// Assumes the elements have a minus (-) operator that returns a valid result that can be compared for distance
         /// </summary>
         /// <typeparam name="T"></typeparam>
