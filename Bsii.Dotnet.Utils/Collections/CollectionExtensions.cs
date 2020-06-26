@@ -812,7 +812,9 @@ namespace Bsii.Dotnet.Utils.Collections
             {
                 return sortedCollection[idx];
             }
-            idx = ~idx;
+            //Binary search returns the complement of the index at which the index would have been located if it was found
+            //Now idx holds the index of the element greater than the target element
+            idx = ~idx; 
             if (idx == sortedCollection.Count)
             {
                 return sortedCollection[sortedCollection.Count - 1];
