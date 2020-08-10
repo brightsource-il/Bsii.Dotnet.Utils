@@ -50,14 +50,14 @@ namespace Bsii.Dotnet.Utils.Tests
         {
             var props = new[] { "M.I.C.H.A.E.L", "L.E.A.H.C.I.M" };
             var value = new Root();
-            Exception ex = Assert.Throws<Exception>(()=>
+            var ex = Assert.Throws<Exception>(()=>
                 ObjectFiller.FillObject(value, (path, type) =>
                 {
                     if (path == props[0])
                     {
                         return 42;
                     }
-                    return 84;
+                    return 8.4;
                 }, props));
             Assert.Contains("M.I.C.H.A.E.L", ex.Message);
         }
