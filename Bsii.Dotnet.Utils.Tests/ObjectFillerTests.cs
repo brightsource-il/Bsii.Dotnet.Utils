@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Bsii.Dotnet.Utils.Reflection;
 using Xunit;
 
@@ -42,6 +43,23 @@ namespace Bsii.Dotnet.Utils.Tests
             Assert.Equal(42, value.E.I.T.A.N);
             Assert.Equal(84, value.E.T.H.A.N);
 
+        }
+
+        [Fact]
+        public void TestFillingWrongObject()
+        {
+            var props = new[] { "M.I.C.H.A.E.L", "L.E.A.H.C.I.M" };
+            var value = new Root();
+            Exception ex = Assert.Throws<Exception>(()=>
+                ObjectFiller.FillObject(value, (path, type) =>
+                {
+                    if (path == props[0])
+                    {
+                        return 42;
+                    }
+                    return 84;
+                }, props));
+            Assert.Contains("M.I.C.H.A.E.L", ex.Message);
         }
 
         #region Support classes
