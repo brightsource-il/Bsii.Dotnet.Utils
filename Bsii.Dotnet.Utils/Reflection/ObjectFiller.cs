@@ -15,25 +15,33 @@ namespace Bsii.Dotnet.Utils.Reflection
             var rootTypeAccessor = TypeAccessor.Create(instance.GetType(), false);
             foreach (var property in propertyPaths)
             {
-                var propertyPath = property.Split(new[] { propertyPathSeparator }, StringSplitOptions.RemoveEmptyEntries);
-                var accessor = rootTypeAccessor;
-                var currentValue = instance;
-                foreach (var path in propertyPath.Take(propertyPath.Length - 1))
+                try
                 {
-                    if (accessor[currentValue, path] == null)
+                    var propertyPath = property.Split(new[] { propertyPathSeparator }, StringSplitOptions.RemoveEmptyEntries);
+                    var accessor = rootTypeAccessor;
+                    var currentValue = instance;
+                    foreach (var path in propertyPath.Take(propertyPath.Length - 1))
                     {
-                        var member = accessor.GetMembers().First(m => m.Name == path);
-                        accessor[currentValue, path] = Activator.CreateInstance(member.Type);
+                        if (accessor[currentValue, path] == null)
+                        {
+                            var member = accessor.GetMembers().First(m => m.Name == path);
+                            accessor[currentValue, path] = Activator.CreateInstance(member.Type);
 
+                        }
+                        currentValue = accessor[currentValue, path];
+                        accessor = TypeAccessor.Create(currentValue.GetType(), false);
                     }
-                    currentValue = accessor[currentValue, path];
                     accessor = TypeAccessor.Create(currentValue.GetType(), false);
+                    {
+                        var memberInfo = accessor.GetMembers().First(m => m.Name == propertyPath.Last());
+                        accessor[currentValue, memberInfo.Name] = valueResolver(property, memberInfo.Type);
+                    }
                 }
-                accessor = TypeAccessor.Create(currentValue.GetType(), false);
+                catch (Exception e)
                 {
-                    var memberInfo = accessor.GetMembers().First(m => m.Name == propertyPath.Last());
-                    accessor[currentValue, memberInfo.Name] = valueResolver(property, memberInfo.Type);
+                    throw new Exception($"Error occured while trying to fill the object's Property: {property}",e);
                 }
+                
             }
         }
     }
