@@ -39,7 +39,7 @@ namespace Bsii.Dotnet.Utils.Reflection
                 }
                 catch (Exception e)
                 {
-                    throw new Exception($"{e.Message}, (Property: {property})");
+                    throw new Exception($"Error occured while trying to fill the object's Property: {property}",e);
                 }
                 
             }
