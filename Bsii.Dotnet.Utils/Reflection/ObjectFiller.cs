@@ -32,16 +32,17 @@ namespace Bsii.Dotnet.Utils.Reflection
                         accessor = TypeAccessor.Create(currentValue.GetType(), false);
                     }
                     accessor = TypeAccessor.Create(currentValue.GetType(), false);
-                    {
-                        var memberInfo = accessor.GetMembers().First(m => m.Name == propertyPath.Last());
-                        accessor[currentValue, memberInfo.Name] = valueResolver(property, memberInfo.Type);
-                    }
+                    var memberInfo = accessor.GetMembers().First(m => m.Name == propertyPath.Last());
+                    accessor[currentValue, memberInfo.Name] = valueResolver(property, memberInfo.Type);
                 }
                 catch (Exception e)
                 {
-                    throw new Exception($"Error occured while trying to fill the object's Property: {property}",e);
+                    throw new Exception($"Error occurred while trying to fill the object's property '{property}'", e)
+                    {
+                        Data = { ["property"] = property }
+                    };
                 }
-                
+
             }
         }
     }
