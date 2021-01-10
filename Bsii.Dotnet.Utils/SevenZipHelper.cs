@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -36,14 +37,16 @@ namespace Bsii.Dotnet.Utils
             }
         }
 
-        public async Task Extract(string archivePath, string targetPath)
+        public async Task Extract(string archivePath, string targetPath, List<string> filters = null)
         {
             var pOutput = await new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = _executablePath,
-                    Arguments = $"x \"{archivePath}\" -y -o\"{targetPath}\""
+                    Arguments = filters == null ? 
+                        $"x \"{archivePath}\" -y -o\"{targetPath}\"" : 
+                        $"x \"{archivePath}\" -y -o\"{targetPath}\" {string.Join(" ",filters)} -r"
                 }
             }.RunAsyncWithStandardStreamCapture();
             if (pOutput.ExitCode != 0)
