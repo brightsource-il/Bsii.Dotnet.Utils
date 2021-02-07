@@ -159,9 +159,6 @@ namespace Bsii.Dotnet.Utils
         /// <summary>
         /// Throws a <see cref="TimeoutException"/> if the task didn't complete within the given <paramref name="time"/>
         /// </summary>
-        /// <param name="task"></param>
-        /// <param name="time"></param>
-        /// <returns></returns>
         public static async Task TimeoutAfter(this Task task, TimeSpan time)
         {
             if (task == await Task.WhenAny(task, Task.Delay(time)))
