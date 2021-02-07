@@ -99,5 +99,13 @@ namespace Bsii.Dotnet.Utils.Tests
             Assert.True(progCallbacks.Count > 0);
             Assert.True(progCallbacks.IsSorted());
         }
+
+
+        [Fact]
+        public async Task TestTimeoutAfter()
+        {
+            await Assert.ThrowsAsync<TimeoutException>(() => Task.Delay(1000).TimeoutAfter(TimeSpan.FromMilliseconds(30)));
+            await Task.Delay(50).TimeoutAfter(TimeSpan.FromMilliseconds(500));
+        }
     }
 }
