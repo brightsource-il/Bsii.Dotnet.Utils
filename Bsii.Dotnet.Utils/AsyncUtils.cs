@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
@@ -42,7 +43,7 @@ namespace Bsii.Dotnet.Utils
             }
 
             var tb = new TransformBlock<TIn, TOut>(
-                (Func<TIn, Task<TOut>>) WrappedTransform,
+                (Func<TIn, Task<TOut>>)WrappedTransform,
                 new ExecutionDataflowBlockOptions
                 {
                     MaxDegreeOfParallelism = maxDegreeOfParallelism ?? Environment.ProcessorCount
@@ -147,28 +148,51 @@ namespace Bsii.Dotnet.Utils
         /// <summary>
         /// A shorthand for task.ConfigureAwait(false).GetAwaiter().GetResult()
         /// </summary>
-        public static void WaitContextless(this Task task) => 
+        public static void WaitContextless(this Task task) =>
             task.ConfigureAwait(false).GetAwaiter().GetResult();
 
         /// <summary>
         /// A shorthand for task.ConfigureAwait(false).GetAwaiter().GetResult()
         /// </summary>
-        public static T GetResultContextless<T>(this Task<T> task) => 
+        public static T GetResultContextless<T>(this Task<T> task) =>
             task.ConfigureAwait(false).GetAwaiter().GetResult();
-        
+
         /// <summary>
-        /// Throws a <see cref="TimeoutException"/> if the task didn't complete within the given <paramref name="time"/>
+        /// Throws a <see cref="TimeoutException"/> if the task didn't complete within the specified time window<br/>
+        /// or <see cref="OperationCanceledException"/> if a cancellation token was provided and cancelled.
         /// </summary>
-        public static async Task TimeoutAfter(this Task task, TimeSpan time)
+        public static async Task TimeoutAfter(this Task task, TimeSpan time, CancellationToken cancellationToken = default)
         {
-            if (task == await Task.WhenAny(task, Task.Delay(time)))
+            var timeoutTask = Task.Delay(time, cancellationToken);
+            var completed = await Task.WhenAny(task, timeoutTask);
+            if (completed != task)
             {
-                await task;
-            }
-            else
-            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    throw new OperationCanceledException();
+                }
                 throw new TimeoutException();
             }
+        }
+
+        /// <summary>
+        /// Throws a <see cref="TimeoutException"/> if the task didn't complete within the specified time window,<br/>
+        /// Throws <see cref="OperationCanceledException"/> if a cancellation token was provided and cancelled.
+        /// Otherwise, returns the result of the task.
+        /// </summary>
+        public static async Task<T> TimeoutAfter<T>(this Task<T> task, TimeSpan time, CancellationToken cancellationToken = default)
+        {
+            var timeoutTask = Task.Delay(time, cancellationToken);
+            var completed = await Task.WhenAny(task, timeoutTask);
+            if (completed == task)
+            {
+                return task.Result;
+            }
+            if (cancellationToken.IsCancellationRequested)
+            {
+                throw new OperationCanceledException();
+            }
+            throw new TimeoutException();
         }
     }
 }

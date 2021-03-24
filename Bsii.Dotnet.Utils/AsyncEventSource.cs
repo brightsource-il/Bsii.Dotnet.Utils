@@ -10,8 +10,14 @@ namespace Bsii.Dotnet.Utils
         private readonly AsyncValueSource<bool> _signaler = 
             new AsyncValueSource<bool>();
 
-        public void Signal() => _signaler.Next(true);
+        /// <summary>
+        /// Sends a signal to current awaiters
+        /// </summary>
+        public void Signal() => _signaler.SetNext(true);
 
+        /// <summary>
+        /// Waits for a future signal
+        /// </summary>
         public Task WaitAsync() => _signaler.GetNextAsync();
     }
 }

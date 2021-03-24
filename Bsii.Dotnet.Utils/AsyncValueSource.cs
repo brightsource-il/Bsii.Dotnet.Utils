@@ -11,7 +11,7 @@ namespace Bsii.Dotnet.Utils
         private TaskCompletionSource<T> _tcs = new TaskCompletionSource<T>(
             TaskCreationOptions.RunContinuationsAsynchronously);
 
-        public void Next(T value)
+        public void SetNext(T value)
         {
             var captured = _tcs;
             _tcs = new TaskCompletionSource<T>(
@@ -19,9 +19,6 @@ namespace Bsii.Dotnet.Utils
             captured.SetResult(value);
         }
 
-        public Task<T> GetNextAsync()
-        {
-            return _tcs.Task;
-        }
+        public Task<T> GetNextAsync() => _tcs.Task;
     }
 }
