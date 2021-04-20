@@ -52,10 +52,10 @@ namespace Bsii.Dotnet.Utils
             }
         }
 
-        public void EnqueueLiveItem() =>
+        public void PushLiveItem() =>
             Interlocked.Increment(ref _concurrentItems);
 
-        public void DequeueLiveItem() =>
+        public void PopLiveItem() =>
             Interlocked.Decrement(ref _concurrentItems);
 
         private class SlidingWindowRateLimit
