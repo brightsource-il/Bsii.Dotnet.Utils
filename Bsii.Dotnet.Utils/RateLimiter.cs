@@ -47,6 +47,8 @@ namespace Bsii.Dotnet.Utils
                     {
                         break;
                     }
+                    // see remarks at https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.delay?view=net-5.0
+                    // and https://twitter.com/nick_craver/status/1021003343777452032?lang=en
                     await Task.Delay(15, cancellationToken);
                 }
             }

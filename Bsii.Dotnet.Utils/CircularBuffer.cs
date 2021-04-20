@@ -26,11 +26,6 @@ namespace Bsii.Dotnet.Utils
         private int _end;
 
         /// <summary>
-        /// The _size. Buffer size.
-        /// </summary>
-        private int _size;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="CircularBuffer{T}"/> class.
         /// 
         /// </summary>
@@ -70,7 +65,7 @@ namespace Bsii.Dotnet.Utils
 
             _buffer = new T[capacity];
             Array.Copy(items, _buffer, items.Length);
-            _size = items.Length;
+            Size = items.Length;
             _start = 0;
             _end = Size == capacity ? 0 : Size;
         }
@@ -97,7 +92,7 @@ namespace Bsii.Dotnet.Utils
         /// <summary>
         /// Current buffer size (the number of elements that the buffer has).
         /// </summary>
-        public int Size => _size;
+        public int Size { get; private set; }
 
         /// <summary>
         /// Element at the front of the buffer - this[0].
@@ -132,26 +127,26 @@ namespace Bsii.Dotnet.Utils
             {
                 if (IsEmpty)
                 {
-                    throw new IndexOutOfRangeException(string.Format("Cannot access index {0}. Buffer is empty", index));
+                    throw new IndexOutOfRangeException($"Cannot access index {index}. Buffer is empty");
                 }
                 if (index >= Size)
                 {
-                    throw new IndexOutOfRangeException(string.Format("Cannot access index {0}. Buffer size is {1}", index, Size));
+                    throw new IndexOutOfRangeException($"Cannot access index {index}. Buffer size is {Size}");
                 }
-                int actualIndex = InternalIndex(index);
+                var actualIndex = InternalIndex(index);
                 return _buffer[actualIndex];
             }
             set
             {
                 if (IsEmpty)
                 {
-                    throw new IndexOutOfRangeException(string.Format("Cannot access index {0}. Buffer is empty", index));
+                    throw new IndexOutOfRangeException($"Cannot access index {index}. Buffer is empty");
                 }
                 if (index >= Size)
                 {
-                    throw new IndexOutOfRangeException(string.Format("Cannot access index {0}. Buffer size is {1}", index, Size));
+                    throw new IndexOutOfRangeException($"Cannot access index {index}. Buffer size is {Size}");
                 }
-                int actualIndex = InternalIndex(index);
+                var actualIndex = InternalIndex(index);
                 _buffer[actualIndex] = value;
             }
         }
@@ -176,7 +171,7 @@ namespace Bsii.Dotnet.Utils
             {
                 _buffer[_end] = item;
                 Increment(ref _end);
-                ++_size;
+                ++Size;
             }
         }
 
@@ -200,7 +195,7 @@ namespace Bsii.Dotnet.Utils
             {
                 Decrement(ref _start);
                 _buffer[_start] = item;
-                ++_size;
+                ++Size;
             }
         }
 
@@ -210,10 +205,9 @@ namespace Bsii.Dotnet.Utils
         /// </summary>
         public void PopBack()
         {
-            ThrowIfEmpty("Cannot take elements from an empty buffer.");
+            ThrowIfEmpty();
             Decrement(ref _end);
-            _buffer[_end] = default;
-            --_size;
+            --Size;
         }
 
         /// <summary>
@@ -222,10 +216,9 @@ namespace Bsii.Dotnet.Utils
         /// </summary>
         public void PopFront()
         {
-            ThrowIfEmpty("Cannot take elements from an empty buffer.");
-            _buffer[_start] = default;
+            ThrowIfEmpty();
             Increment(ref _start);
-            --_size;
+            --Size;
         }
 
         /// <summary>
@@ -277,11 +270,11 @@ namespace Bsii.Dotnet.Utils
         }
         #endregion
 
-        private void ThrowIfEmpty(string message = "Cannot access an empty buffer.")
+        private void ThrowIfEmpty()
         {
             if (IsEmpty)
             {
-                throw new InvalidOperationException(message);
+                throw new InvalidOperationException("Cannot access an empty buffer.");
             }
         }
 
@@ -289,7 +282,6 @@ namespace Bsii.Dotnet.Utils
         /// Increments the provided index variable by one, wrapping
         /// around if necessary.
         /// </summary>
-        /// <param name="index"></param>
         private void Increment(ref int index)
         {
             if (++index == Capacity)
@@ -302,7 +294,6 @@ namespace Bsii.Dotnet.Utils
         /// Decrements the provided index variable by one, wrapping
         /// around if necessary.
         /// </summary>
-        /// <param name="index"></param>
         private void Decrement(ref int index)
         {
             if (index == 0)
@@ -323,7 +314,7 @@ namespace Bsii.Dotnet.Utils
         /// </param>
         private int InternalIndex(int index)
         {
-            return _start + (index < Capacity - _start ? index : index - Capacity);
+            return _start + (index < Capacity - _start ? index : index - _buffer.Length);
         }
 
         #region Array items easy access.
