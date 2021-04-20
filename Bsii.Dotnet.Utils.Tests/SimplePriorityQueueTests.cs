@@ -1,4 +1,5 @@
 ﻿using Bsii.Sfg.Core.Utils;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -19,12 +20,15 @@ namespace Bsii.Dotnet.Utils.Tests
             {
                 q.Enqueue(item, item);
             }
+            var dequeuedData = new List<int>(data.Length);
             foreach (var item in data.Reverse())
             {
+                dequeuedData.Add(item);
                 Assert.True(q.TryDequeue(out var queuedItem, out var queuedItemPriority));
                 Assert.Equal(item, queuedItem);
                 Assert.Equal(item, queuedItemPriority);
             }
+            Assert.Equal(data.Reverse(), dequeuedData);
         }
 
     }
