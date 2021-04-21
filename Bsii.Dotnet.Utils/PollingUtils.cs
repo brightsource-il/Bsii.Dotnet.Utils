@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Bsii.Dotnet.Utils
 {
-    public class PollingUtils
+    public static class PollingUtils
     {
         #region PollUntilAsync
 
