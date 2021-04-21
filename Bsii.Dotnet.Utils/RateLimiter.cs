@@ -4,28 +4,43 @@ using System.Threading.Tasks;
 
 namespace Bsii.Dotnet.Utils
 {
+    /// <summary>
+    /// Provides a rate limiting mechanism with two parameters:<br/>
+    /// 1. Max passes through the <see cref="BarrierAsync(CancellationToken)"/> in a time window<br/>
+    /// 2. Max live items at any time (controlled externally by calling the <see cref="PushLiveItem"/> &amp; <see cref="PopLiveItem"/> methods
+    /// </summary>
+    /// <remarks>
+    /// No concurrent calls to the <see cref="BarrierAsync(CancellationToken)"/> method should be made as it is not thread safe, <br/>
+    /// However, the methods <see cref="PushLiveItem"/> &amp; <see cref="PopLiveItem"/> are thread-safe and can be called concurrently from multiple threads.
+    /// </remarks>
     public class RateLimiter
     {
         private readonly SlidingWindowRateLimit _slidingWindow;
-        private volatile int _concurrentItems;
-        private readonly int? _maxConcurrency;
+        private volatile int _liveItemsCount;
+        private readonly int? _maxLiveItems;
 
-        public RateLimiter(int? maxPerWindow, TimeSpan? windowSize, int? maxConcurrency)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="maxPassesPerWindow">If not null - specifies the max allowed passes through the <see cref="BarrierAsync(CancellationToken)"/> within a time window</param>
+        /// <param name="windowSize">If not null - specifies the size of the sliding time window</param>
+        /// <param name="maxLiveItems">If not null - specifies the amount of lives items allowed without blocking the caller of the <see cref="BarrierAsync(CancellationToken)"/> method</param>
+        public RateLimiter(int? maxPassesPerWindow, TimeSpan? windowSize, int? maxLiveItems)
         {
-            if (maxPerWindow.HasValue)
+            if (maxPassesPerWindow.HasValue)
             {
                 var windowSizeChecked = windowSize
                     ?? throw new ArgumentNullException(nameof(windowSize),
-                            $"value can't be null when {nameof(maxPerWindow)} value was specified");
-                _slidingWindow = new SlidingWindowRateLimit(maxPerWindow.Value, windowSizeChecked);
+                            $"value can't be null when {nameof(maxPassesPerWindow)} value was specified");
+                _slidingWindow = new SlidingWindowRateLimit(maxPassesPerWindow.Value, windowSizeChecked);
             }
-            _maxConcurrency = maxConcurrency;
+            _maxLiveItems = maxLiveItems;
         }
 
         /// <summary>
         /// Verifies rate limits (tries to complete synchronously if possible)
         /// </summary>
-        public async ValueTask Barrier(CancellationToken cancellationToken)
+        public async ValueTask BarrierAsync(CancellationToken cancellationToken)
         {
             if (_slidingWindow != null)
             {
@@ -39,11 +54,11 @@ namespace Bsii.Dotnet.Utils
                 }
             }
 
-            if (_maxConcurrency != null)
+            if (_maxLiveItems != null)
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    if (_concurrentItems < _maxConcurrency.Value)
+                    if (_liveItemsCount < _maxLiveItems.Value)
                     {
                         break;
                     }
@@ -58,10 +73,10 @@ namespace Bsii.Dotnet.Utils
         }
 
         public void PushLiveItem() =>
-            Interlocked.Increment(ref _concurrentItems);
+            Interlocked.Increment(ref _liveItemsCount);
 
         public void PopLiveItem() =>
-            Interlocked.Decrement(ref _concurrentItems);
+            Interlocked.Decrement(ref _liveItemsCount);
 
         private class SlidingWindowRateLimit
         {

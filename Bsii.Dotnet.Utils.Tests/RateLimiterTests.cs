@@ -22,7 +22,7 @@ namespace Bsii.Dotnet.Utils.Tests
                 manualResetEvent.Set();
                 for (var i = 0; i < maxItemsPerWindow * 2; i++)
                 {
-                    await limiter.Barrier(CancellationToken.None);
+                    await limiter.BarrierAsync(CancellationToken.None);
                     Interlocked.Increment(ref executions);
                 }
             });

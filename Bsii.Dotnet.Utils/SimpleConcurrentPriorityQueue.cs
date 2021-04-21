@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Linq;
 
-namespace Bsii.Sfg.Core.Utils
+namespace Bsii.Dotnet.Utils
 {
     /// <summary>
     /// A super simple, concurrent, priority queue.

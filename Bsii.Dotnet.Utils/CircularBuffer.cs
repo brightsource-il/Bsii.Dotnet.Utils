@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Bsii.Dotnet.Utils
 {
@@ -269,7 +270,7 @@ namespace Bsii.Dotnet.Utils
             return GetEnumerator();
         }
         #endregion
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ThrowIfEmpty()
         {
             if (IsEmpty)
@@ -282,6 +283,7 @@ namespace Bsii.Dotnet.Utils
         /// Increments the provided index variable by one, wrapping
         /// around if necessary.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Increment(ref int index)
         {
             if (++index == Capacity)
@@ -294,6 +296,7 @@ namespace Bsii.Dotnet.Utils
         /// Decrements the provided index variable by one, wrapping
         /// around if necessary.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Decrement(ref int index)
         {
             if (index == 0)
@@ -312,6 +315,7 @@ namespace Bsii.Dotnet.Utils
         /// <param name='index'>
         /// External index.
         /// </param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int InternalIndex(int index)
         {
             return _start + (index < Capacity - _start ? index : index - _buffer.Length);
