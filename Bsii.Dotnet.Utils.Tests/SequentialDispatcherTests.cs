@@ -4,6 +4,7 @@ using Bsii.Dotnet.Utils.Sequential;
 using System.Linq;
 using System;
 using System.Threading;
+using System.Diagnostics;
 
 namespace Bsii.Dotnet.Utils.Tests
 {
@@ -86,6 +87,39 @@ namespace Bsii.Dotnet.Utils.Tests
             await t4; //Should not throw
             await Assert.ThrowsAsync<OperationCanceledException>(async () => await t5);
             await t6; //Should be the one invoked
+        }
+
+
+        [Fact]
+        public async Task TestActivityTraceIdCaptured()
+        {
+            using var activity = new Activity(nameof(TestActivityTraceIdCaptured)).Use();
+            using ISequentialOperationsDispatcher dispatcher = new BufferBlockSequentialDispatcher();
+            dispatcher.Start();
+            var traceId = Activity.Current.TraceId.ToHexString();
+            var (capturedActivityOperationName, capturedActivityId) = 
+                await dispatcher.Dispatch(() => (Activity.Current.OperationName, Activity.Current.Id)); //Sync with result
+            Assert.Equal(nameof(TestActivityTraceIdCaptured), capturedActivityOperationName);
+            Assert.Contains(traceId, capturedActivityId);
+            await dispatcher.Dispatch(() =>
+            {
+                capturedActivityOperationName = Activity.Current.OperationName + "2";
+                capturedActivityId = Activity.Current.Id;
+            }); //Sync void
+            Assert.Equal(nameof(TestActivityTraceIdCaptured) + "2", capturedActivityOperationName);
+            Assert.Contains(traceId, capturedActivityId);
+            (capturedActivityOperationName, capturedActivityId) = 
+                await dispatcher.Dispatch(() => Task.FromResult((Activity.Current.OperationName, Activity.Current.Id))); //Async with result
+            Assert.Equal(nameof(TestActivityTraceIdCaptured), capturedActivityOperationName);
+            Assert.Contains(traceId, capturedActivityId);
+            await dispatcher.Dispatch(() =>
+            {
+                capturedActivityOperationName = Activity.Current.OperationName + "2";
+                capturedActivityId = Activity.Current.Id;
+                return Task.CompletedTask;
+            }); //Async void
+            Assert.Equal(nameof(TestActivityTraceIdCaptured) + "2", capturedActivityOperationName);
+            Assert.Contains(traceId, capturedActivityId);
         }
     }
 }
