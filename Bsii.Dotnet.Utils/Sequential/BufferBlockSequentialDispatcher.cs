@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -25,7 +26,9 @@ namespace Bsii.Dotnet.Utils.Sequential
         private sealed class DispatchedOperation<T> : IDispatchedOperation
         {
             private readonly Func<Task<T>> _exec;
-            private readonly TaskCompletionSource<T> _tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+            private readonly Activity _capturedActivity;
+            private readonly TaskCompletionSource<T> _tcs = new TaskCompletionSource<T>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
 
             public Task<T> OperationRepresentation => _tcs.Task;
 
@@ -33,18 +36,22 @@ namespace Bsii.Dotnet.Utils.Sequential
             public DispatchedOperation(Func<Task<T>> exec)
             {
                 _exec = exec;
+                _capturedActivity = Activity.Current?.CreateChildActivity();
             }
 
             public async Task ExecuteAsync()
             {
-                try
+                using (_capturedActivity?.Use())
                 {
-                    var res = await _exec();
-                    _tcs.SetResult(res);
-                }
-                catch (Exception e)
-                {
-                    _tcs.SetException(e);
+                    try
+                    {
+                        var res = await _exec();
+                        _tcs.SetResult(res);
+                    }
+                    catch (Exception e)
+                    {
+                        _tcs.SetException(e);
+                    }
                 }
             }
 
@@ -52,7 +59,6 @@ namespace Bsii.Dotnet.Utils.Sequential
             {
                 _tcs.SetException(ex);
             }
-            
         }
 
         /// <summary>
@@ -61,7 +67,9 @@ namespace Bsii.Dotnet.Utils.Sequential
         private sealed class DispatchedOperation : IDispatchedOperation
         {
             private readonly Func<Task> _exec;
-            private readonly TaskCompletionSource<object> _tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+            private readonly TaskCompletionSource<object> _tcs =
+                new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+            private readonly Activity _capturedActivity;
 
             public Task OperationRepresentation => _tcs.Task;
 
@@ -69,18 +77,22 @@ namespace Bsii.Dotnet.Utils.Sequential
             public DispatchedOperation(Func<Task> exec)
             {
                 _exec = exec;
+                _capturedActivity = Activity.Current?.CreateChildActivity();
             }
 
             public async Task ExecuteAsync()
             {
-                try
+                using (_capturedActivity?.Use())
                 {
-                    await _exec();
-                    _tcs.SetResult(null);
-                }
-                catch (Exception e)
-                {
-                    _tcs.SetException(e);
+                    try
+                    {
+                        await _exec();
+                        _tcs.SetResult(null);
+                    }
+                    catch (Exception e)
+                    {
+                        _tcs.SetException(e);
+                    }
                 }
             }
 
