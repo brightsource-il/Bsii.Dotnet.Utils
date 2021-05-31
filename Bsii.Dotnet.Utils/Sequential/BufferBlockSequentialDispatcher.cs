@@ -26,9 +26,9 @@ namespace Bsii.Dotnet.Utils.Sequential
         private sealed class DispatchedOperation<T> : IDispatchedOperation
         {
             private readonly Func<Task<T>> _exec;
-            private readonly string _activityId;
-            private readonly string _activityOperationName;
-            private readonly TaskCompletionSource<T> _tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+            private readonly Activity _capturedActivity;
+            private readonly TaskCompletionSource<T> _tcs = new TaskCompletionSource<T>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
 
             public Task<T> OperationRepresentation => _tcs.Task;
 
@@ -36,32 +36,22 @@ namespace Bsii.Dotnet.Utils.Sequential
             public DispatchedOperation(Func<Task<T>> exec)
             {
                 _exec = exec;
-                var currentActivity = Activity.Current;
-                _activityId = currentActivity?.Id;
-                _activityOperationName = currentActivity?.OperationName;
+                _capturedActivity = Activity.Current?.CreateChildActivity();
             }
 
             public async Task ExecuteAsync()
             {
-                Activity activity = default;
-                if (_activityId != default)
+                using (_capturedActivity?.Use())
                 {
-                    activity = new Activity(_activityOperationName);
-                    activity.SetParentId(_activityId);
-                    activity.Start();
-                }
-                try
-                {
-                    var res = await _exec();
-                    _tcs.SetResult(res);
-                }
-                catch (Exception e)
-                {
-                    _tcs.SetException(e);
-                }
-                finally
-                {
-                    activity?.Stop();
+                    try
+                    {
+                        var res = await _exec();
+                        _tcs.SetResult(res);
+                    }
+                    catch (Exception e)
+                    {
+                        _tcs.SetException(e);
+                    }
                 }
             }
 
@@ -69,7 +59,6 @@ namespace Bsii.Dotnet.Utils.Sequential
             {
                 _tcs.SetException(ex);
             }
-            
         }
 
         /// <summary>
@@ -78,9 +67,9 @@ namespace Bsii.Dotnet.Utils.Sequential
         private sealed class DispatchedOperation : IDispatchedOperation
         {
             private readonly Func<Task> _exec;
-            private readonly TaskCompletionSource<object> _tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
-            private string _activityId;
-            private string _activityOperationName;
+            private readonly TaskCompletionSource<object> _tcs =
+                new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+            private readonly Activity _capturedActivity;
 
             public Task OperationRepresentation => _tcs.Task;
 
@@ -88,32 +77,22 @@ namespace Bsii.Dotnet.Utils.Sequential
             public DispatchedOperation(Func<Task> exec)
             {
                 _exec = exec;
-                var currentActivity = Activity.Current;
-                _activityId = currentActivity?.Id;
-                _activityOperationName = currentActivity?.OperationName;
+                _capturedActivity = Activity.Current?.CreateChildActivity();
             }
 
             public async Task ExecuteAsync()
             {
-                Activity activity = default;
-                if (_activityId != default)
+                using (_capturedActivity?.Use())
                 {
-                    activity = new Activity(_activityOperationName);
-                    activity.SetParentId(_activityId);
-                    activity.Start();
-                }
-                try
-                {
-                    await _exec();
-                    _tcs.SetResult(null);
-                }
-                catch (Exception e)
-                {
-                    _tcs.SetException(e);
-                }
-                finally
-                {
-                    activity?.Stop();
+                    try
+                    {
+                        await _exec();
+                        _tcs.SetResult(null);
+                    }
+                    catch (Exception e)
+                    {
+                        _tcs.SetException(e);
+                    }
                 }
             }
 
