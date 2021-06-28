@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -198,7 +199,7 @@ namespace Bsii.Dotnet.Utils
         /// <summary>
         /// A shorthand for measuring task execution time 
         /// <param name="action">The action to be executed</param>
-        /// <returns> a tuple includes a TimeSpan represents the execution time and the </returns>
+        /// <returns> a tuple includes a TimeSpan represents the execution time and the result </returns>
         /// </summary>
         public static async Task<(T res, TimeSpan elapsed)> TimeExecutionAsync<T>(this Func<Task<T>> action)
         {
