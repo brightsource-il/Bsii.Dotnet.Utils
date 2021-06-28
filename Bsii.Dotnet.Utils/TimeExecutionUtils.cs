@@ -60,23 +60,13 @@ namespace Bsii.Dotnet.Utils
         /// <param name="action">The action to be executed</param>
         /// <returns> a tuple includes a TimeSpan represents the execution time and the result </returns>
         /// </summary>
-        public static async Task<TimeSpan> TimeExecutionAsync(this Task action)
-        {
-            var sw = Stopwatch.StartNew();
-            await action;
-            return sw.Elapsed;
-        }
+        public static  Task<TimeSpan> TimeExecutionAsync(this Task action) => TimeExecutionAsync(() => action);
 
         /// <summary>
         /// A shorthand for measuring task execution time 
         /// <param name="action">The action to be executed</param>
         /// <returns> a tuple includes a TimeSpan represents the execution time and the result </returns>
         /// </summary>
-        public static async Task<(T res, TimeSpan elapsed)> TimeExecutionAsync<T>(this Task<T> action)
-        {
-            var sw = Stopwatch.StartNew();
-            var res = await action;
-            return (res, sw.Elapsed);
-        }
+        public static  Task<(T res, TimeSpan elapsed)> TimeExecutionAsync<T>(this Task<T> action) => TimeExecutionAsync(() => action);
     }
 }
