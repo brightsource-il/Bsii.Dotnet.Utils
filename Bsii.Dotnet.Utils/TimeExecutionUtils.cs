@@ -8,7 +8,7 @@ namespace Bsii.Dotnet.Utils
     {
 
         /// <summary>
-        /// A shorthand for measuring task execution time 
+        /// A shorthand for measuring async function  execution time 
         /// <param name="action">The action to be executed</param>
         /// <returns> a tuple includes a TimeSpan represents the execution time and the result </returns>
         /// </summary>
@@ -20,7 +20,7 @@ namespace Bsii.Dotnet.Utils
         }
 
         /// <summary>
-        /// A shorthand for measuring task execution time 
+        /// A shorthand for measuring async function execution time 
         /// <param name="action">The action to be executed</param>
         /// <returns> a TimeSpan represents the execution time</returns>
         /// </summary>
@@ -52,6 +52,30 @@ namespace Bsii.Dotnet.Utils
         {
             var sw = Stopwatch.StartNew();
             var res = action();
+            return (res, sw.Elapsed);
+        }
+
+        /// <summary>
+        /// A shorthand for measuring task execution time 
+        /// <param name="action">The action to be executed</param>
+        /// <returns> a tuple includes a TimeSpan represents the execution time and the result </returns>
+        /// </summary>
+        public static async Task<TimeSpan> TimeExecution(this Task action)
+        {
+            var sw = Stopwatch.StartNew();
+            await action;
+            return sw.Elapsed;
+        }
+
+        /// <summary>
+        /// A shorthand for measuring task execution time 
+        /// <param name="action">The action to be executed</param>
+        /// <returns> a tuple includes a TimeSpan represents the execution time and the result </returns>
+        /// </summary>
+        public static async Task<(T res, TimeSpan elapsed)> TimeExecution<T>(this Task<T> action)
+        {
+            var sw = Stopwatch.StartNew();
+            var res = await action;
             return (res, sw.Elapsed);
         }
     }
