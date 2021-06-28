@@ -194,5 +194,29 @@ namespace Bsii.Dotnet.Utils
             }
             throw new TimeoutException();
         }
+
+        /// <summary>
+        /// A shorthand for measuring task execution time 
+        /// <param name="action">The action to be executed</param>
+        /// <returns> a tuple includes a TimeSpan represents the execution time and the </returns>
+        /// </summary>
+        public static async Task<(T res, TimeSpan elapsed)> TimeExecutionAsync<T>(this Func<Task<T>> action)
+        {
+            var sw = Stopwatch.StartNew();
+            var res = await action();
+            return (res, sw.Elapsed);
+        }
+
+        /// <summary>
+        /// A shorthand for measuring task execution time 
+        /// <param name="action">The action to be executed</param>
+        /// <returns> a TimeSpan represents the execution time</returns>
+        /// </summary>
+        public static async Task<TimeSpan> TimeExecutionAsync(this Func<Task> action)
+        {
+            var sw = Stopwatch.StartNew();
+            await action();
+            return sw.Elapsed;
+        }
     }
 }
