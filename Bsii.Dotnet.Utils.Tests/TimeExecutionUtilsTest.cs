@@ -6,13 +6,14 @@ namespace Bsii.Dotnet.Utils.Tests
 {
     public class TimeExecutionUtilsTest
     {
-        const double TestPrecisionMilliseconds = 20;    // Task.Delay(X) takes a bit more then X ms due to multi threading 
+        // Task.Delay(X) takes a bit more then X ms due to task-scheduling and low end CPU available at GitHub Actions:
+        const double TestPrecisionMilliseconds = 100;
 
         [Fact]
         public async Task VoidAsyncFuncUtilTest()
         {
             static Task AsyncFunc() => Task.Delay(200);
-            var res  = await TimeExecutionUtils.TimeExecutionAsync(AsyncFunc);
+            var res = await TimeExecutionUtils.TimeExecutionAsync(AsyncFunc);
             AssertResult(TimeSpan.FromMilliseconds(200), res);
         }
 
@@ -25,7 +26,7 @@ namespace Bsii.Dotnet.Utils.Tests
                 return 1;
             }
 
-            var (res, time)  = await TimeExecutionUtils.TimeExecutionAsync(AsyncFunc);
+            var (res, time) = await TimeExecutionUtils.TimeExecutionAsync(AsyncFunc);
             AssertResult(TimeSpan.FromMilliseconds(200), time);
             Assert.Equal(1, res);
         }
@@ -33,7 +34,7 @@ namespace Bsii.Dotnet.Utils.Tests
         [Fact]
         public async Task VoidTaskUtilTest()
         {
-            var res  = await Task.Delay(200).TimeExecutionAsync();
+            var res = await Task.Delay(200).TimeExecutionAsync();
             AssertResult(TimeSpan.FromMilliseconds(200), res);
         }
 
@@ -46,7 +47,7 @@ namespace Bsii.Dotnet.Utils.Tests
                 return 1;
             }
 
-            var (res, time)  = await AsyncFunc().TimeExecutionAsync();
+            var (res, time) = await AsyncFunc().TimeExecutionAsync();
             AssertResult(TimeSpan.FromMilliseconds(200), time);
             Assert.Equal(1, res);
         }
@@ -73,7 +74,7 @@ namespace Bsii.Dotnet.Utils.Tests
             Assert.Equal(1, res);
         }
 
-        private static void AssertResult(TimeSpan expected, TimeSpan actual) => 
+        private static void AssertResult(TimeSpan expected, TimeSpan actual) =>
             Assert.True(Math.Abs(expected.TotalMilliseconds - actual.TotalMilliseconds) < TestPrecisionMilliseconds);
     }
 }
