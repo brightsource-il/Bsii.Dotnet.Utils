@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -7,13 +8,12 @@ namespace Bsii.Dotnet.Utils.Tests
     public class TimeExecutionUtilsTest
     {
         // Task.Delay(X) takes a bit more then X ms due to task-scheduling and low end CPU available at GitHub Actions:
-        const double TestPrecisionMilliseconds = 100;
+        const int TestPrecisionMilliseconds = 100;
 
         [Fact]
         public async Task VoidAsyncFuncUtilTest()
         {
-            static Task AsyncFunc() => Task.Delay(200);
-            var res = await TimeExecutionUtils.TimeExecutionAsync(AsyncFunc);
+            var res = await TimeExecutionUtils.TimeExecutionAsync(() => Task.Delay(200));
             AssertResult(TimeSpan.FromMilliseconds(200), res);
         }
 
@@ -55,8 +55,7 @@ namespace Bsii.Dotnet.Utils.Tests
         [Fact]
         public void VoidSyncFuncUtilTest()
         {
-            static void Func() => Task.Delay(200).WaitContextless();
-            var res = TimeExecutionUtils.TimeExecution(Func);
+            var res = TimeExecutionUtils.TimeExecution(() => Thread.Sleep(200));
             AssertResult(TimeSpan.FromMilliseconds(200), res);
         }
 
@@ -65,7 +64,7 @@ namespace Bsii.Dotnet.Utils.Tests
         {
             static int Func()
             {
-                Task.Delay(200).WaitContextless();
+                Thread.Sleep(200);
                 return 1;
             }
 
