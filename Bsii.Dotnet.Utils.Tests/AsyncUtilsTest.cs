@@ -174,5 +174,68 @@ namespace Bsii.Dotnet.Utils.Tests
             await Task.WhenAll(awaiter1, awaiter2, awaiter3)
                     .TimeoutAfter(TimeSpan.FromMilliseconds(50));
         }
+
+        [Fact]
+        public async Task TestAsyncValueSourceWithGrace()
+        {
+            AsyncValueSource<bool> asyncValueSource = new(TimeSpan.FromMilliseconds(100));
+            asyncValueSource.SetNext(false);
+            // wait more than grace period to block the waiters
+            await Task.Delay(200);
+            IAsyncValueProvider<bool> asyncValueProvider = asyncValueSource;
+            var getNext1 = asyncValueProvider.GetNextAsync();
+            var getNext2 = asyncValueProvider.GetNextAsync();
+            var getNext3 = asyncValueProvider.GetNextAsync();
+            // we should be blocked because we are watching **next** value which isn't set yet...
+            await Assert.ThrowsAsync<TimeoutException>(() =>
+                Task.WhenAll(getNext1, getNext2, getNext3)
+                    .TimeoutAfter(TimeSpan.FromMilliseconds(50)));
+            asyncValueSource.SetNext(false);
+            // we should be able to continue since because the next value was set since we were watching
+            var (n1, n2, n3) = await AsyncUtils.ResolveAll(getNext1, getNext2, getNext3)
+                .TimeoutAfter(TimeSpan.FromSeconds(1));
+            Assert.False(n1);
+            Assert.False(n2);
+            Assert.False(n3);
+
+            asyncValueSource.SetNext(false);
+            getNext1 = asyncValueProvider.GetNextAsync();
+            getNext2 = asyncValueProvider.GetNextAsync();
+            getNext3 = asyncValueProvider.GetNextAsync();
+            // now don't wait => waiters should resolve instantly even though we didn't pass next value
+            (n1, n2, n3) = await AsyncUtils.ResolveAll(getNext1, getNext2, getNext3)
+                .TimeoutAfter(TimeSpan.FromSeconds(1));
+            Assert.False(n1);
+            Assert.False(n2);
+            Assert.False(n3);
+        }
+
+        [Fact]
+        public async Task TestAsyncEventSourceWithGrace()
+        {
+            AsyncEventSource asyncEventSource = new(TimeSpan.FromMilliseconds(100));
+            asyncEventSource.Signal();
+            // wait more than grace period to block the waiters
+            await Task.Delay(200);
+            var awaiter1 = asyncEventSource.WaitAsync();
+            var awaiter2 = asyncEventSource.WaitAsync();
+            var awaiter3 = asyncEventSource.WaitAsync();
+            // we started waiting after the previous signal, so we 'missed it'...
+            await Assert.ThrowsAsync<TimeoutException>(() =>
+                Task.WhenAll(awaiter1, awaiter2, awaiter3)
+                    .TimeoutAfter(TimeSpan.FromMilliseconds(50)));
+            asyncEventSource.Signal();
+            // new signal received, we should be able to continue now...
+            await Task.WhenAll(awaiter1, awaiter2, awaiter3)
+                    .TimeoutAfter(TimeSpan.FromMilliseconds(50));
+
+            asyncEventSource.Signal();
+            awaiter1 = asyncEventSource.WaitAsync();
+            awaiter2 = asyncEventSource.WaitAsync();
+            awaiter3 = asyncEventSource.WaitAsync();
+            // now don't wait => waiters should resolve instantly even though we didn't pass next value
+            await Task.WhenAll(awaiter1, awaiter2, awaiter3)
+                .TimeoutAfter(TimeSpan.FromSeconds(1));
+        }
     }
 }

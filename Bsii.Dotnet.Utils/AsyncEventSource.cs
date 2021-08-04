@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace Bsii.Dotnet.Utils
 {
@@ -7,8 +8,10 @@ namespace Bsii.Dotnet.Utils
     /// </summary>
     public class AsyncEventSource
     {
-        private readonly AsyncValueSource<bool> _signaler = 
-            new AsyncValueSource<bool>();
+        private readonly AsyncValueSource<bool> _signaler;
+
+        public AsyncEventSource(TimeSpan? gracePeriod = default)
+            => _signaler = new AsyncValueSource<bool>(gracePeriod);
 
         /// <summary>
         /// Sends a signal to current awaiters
