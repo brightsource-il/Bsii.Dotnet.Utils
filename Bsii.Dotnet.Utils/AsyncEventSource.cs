@@ -10,6 +10,10 @@ namespace Bsii.Dotnet.Utils
     {
         private readonly AsyncValueSource<bool> _signaler;
 
+        /// <summary>
+        /// </summary>
+        /// <param name="gracePeriod">If positive, latest value will be provided to awaiters for so long since received.
+        /// Otherwise, latest available value will be provided without waiting.</param>
         public AsyncEventSource(TimeSpan? gracePeriod = default)
             => _signaler = new AsyncValueSource<bool>(gracePeriod);
 
