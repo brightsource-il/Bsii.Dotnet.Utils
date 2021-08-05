@@ -141,9 +141,9 @@ namespace Bsii.Dotnet.Utils.Tests
             AsyncValueSource<bool> asyncValueSource = new();
             asyncValueSource.SetNext(false);
             IAsyncValueProvider<bool> asyncValueProvider = asyncValueSource;
-            var getNext1 = asyncValueProvider.GetNextAsync();
-            var getNext2 = asyncValueProvider.GetNextAsync();
-            var getNext3 = asyncValueProvider.GetNextAsync();
+            var getNext1 = asyncValueProvider.GetLatestWithGraceOrNextAsync();
+            var getNext2 = asyncValueProvider.GetLatestWithGraceOrNextAsync();
+            var getNext3 = asyncValueProvider.GetLatestWithGraceOrNextAsync();
             // we should be blocked because we are watching **next** value which isn't set yet...
             await Assert.ThrowsAsync<TimeoutException>(() =>
                 Task.WhenAll(getNext1, getNext2, getNext3)
@@ -178,12 +178,12 @@ namespace Bsii.Dotnet.Utils.Tests
         [Fact]
         public async Task TestAsyncValueSourceWithGrace()
         {
-            AsyncValueSource<object> asyncValueSource = new(TimeSpan.FromMilliseconds(100));
+            GracefulAsyncValueSource<object> asyncValueSource = new(TimeSpan.FromMilliseconds(100));
             IAsyncValueProvider<object> asyncValueProvider = asyncValueSource;
 
             // no graceful value provision
             await Assert.ThrowsAsync<TimeoutException>(() =>
-                asyncValueProvider.GetNextAsync()
+                asyncValueProvider.GetLatestWithGraceOrNextAsync()
                     .TimeoutAfter(TimeSpan.FromMilliseconds(50)));
 
             var value1 = new object();
@@ -191,9 +191,9 @@ namespace Bsii.Dotnet.Utils.Tests
             // wait more than grace period to forget previous value
             await Task.Delay(200);
 
-            var getNext1 = asyncValueProvider.GetNextAsync();
-            var getNext2 = asyncValueProvider.GetNextAsync();
-            var getNext3 = asyncValueProvider.GetNextAsync();
+            var getNext1 = asyncValueProvider.GetLatestWithGraceOrNextAsync();
+            var getNext2 = asyncValueProvider.GetLatestWithGraceOrNextAsync();
+            var getNext3 = asyncValueProvider.GetLatestWithGraceOrNextAsync();
 
             // we should be blocked because we are watching **next** value which isn't set yet...
             await Assert.ThrowsAsync<TimeoutException>(() =>
@@ -210,9 +210,9 @@ namespace Bsii.Dotnet.Utils.Tests
 
             var value3 = new object();
             asyncValueSource.SetNext(value3);
-            getNext1 = asyncValueProvider.GetNextAsync();
-            getNext2 = asyncValueProvider.GetNextAsync();
-            getNext3 = asyncValueProvider.GetNextAsync();
+            getNext1 = asyncValueProvider.GetLatestWithGraceOrNextAsync();
+            getNext2 = asyncValueProvider.GetLatestWithGraceOrNextAsync();
+            getNext3 = asyncValueProvider.GetLatestWithGraceOrNextAsync();
             // now don't wait => waiters should resolve instantly even though we didn't pass next value
             (n1, n2, n3) = await AsyncUtils.ResolveAll(getNext1, getNext2, getNext3);
             n1.Should().Be(value3);
@@ -223,19 +223,19 @@ namespace Bsii.Dotnet.Utils.Tests
         [Fact]
         public async Task TestAsyncEventSourceWithGrace()
         {
-            AsyncEventSource asyncEventSource = new(TimeSpan.FromMilliseconds(100));
+            GracefulAsyncEventSource asyncEventSource = new(TimeSpan.FromMilliseconds(100));
 
             // no graceful value provision
             await Assert.ThrowsAsync<TimeoutException>(() =>
-                asyncEventSource.WaitAsync()
+                asyncEventSource.LatestWithGraceOrWaitAsync()
                     .TimeoutAfter(TimeSpan.FromMilliseconds(50)));
 
             asyncEventSource.Signal();
             // wait more than grace period to block the waiters
             await Task.Delay(200);
-            var awaiter1 = asyncEventSource.WaitAsync();
-            var awaiter2 = asyncEventSource.WaitAsync();
-            var awaiter3 = asyncEventSource.WaitAsync();
+            var awaiter1 = asyncEventSource.LatestWithGraceOrWaitAsync();
+            var awaiter2 = asyncEventSource.LatestWithGraceOrWaitAsync();
+            var awaiter3 = asyncEventSource.LatestWithGraceOrWaitAsync();
             // we started waiting after the previous signal, so we 'missed it'...
             await Assert.ThrowsAsync<TimeoutException>(() =>
                 Task.WhenAll(awaiter1, awaiter2, awaiter3)
@@ -246,9 +246,9 @@ namespace Bsii.Dotnet.Utils.Tests
                     .TimeoutAfter(TimeSpan.FromMilliseconds(50));
 
             asyncEventSource.Signal();
-            awaiter1 = asyncEventSource.WaitAsync();
-            awaiter2 = asyncEventSource.WaitAsync();
-            awaiter3 = asyncEventSource.WaitAsync();
+            awaiter1 = asyncEventSource.LatestWithGraceOrWaitAsync();
+            awaiter2 = asyncEventSource.LatestWithGraceOrWaitAsync();
+            awaiter3 = asyncEventSource.LatestWithGraceOrWaitAsync();
             // now don't wait => waiters should resolve instantly even though we didn't pass next value
             await Task.WhenAll(awaiter1, awaiter2, awaiter3)
                 .TimeoutAfter(TimeSpan.FromSeconds(1));
@@ -257,21 +257,21 @@ namespace Bsii.Dotnet.Utils.Tests
         [Fact]
         public async Task TestAsyncValueSourceWithLatestValue()
         {
-            AsyncValueSource<object> asyncValueSource = new(Timeout.InfiniteTimeSpan);
+            GracefulAsyncValueSource<object> asyncValueSource = new(Timeout.InfiniteTimeSpan);
             IAsyncValueProvider<object> asyncValueProvider = asyncValueSource;
 
             // no graceful value provision
             await Assert.ThrowsAsync<TimeoutException>(() =>
-                asyncValueProvider.GetNextAsync()
+                asyncValueProvider.GetLatestWithGraceOrNextAsync()
                     .TimeoutAfter(TimeSpan.FromMilliseconds(50)));
 
             asyncValueSource.SetNext(new object());
 
             // wait more than grace period to block the waiters
             await Task.Delay(200);
-            var getNext1 = await asyncValueProvider.GetNextAsync();
+            var getNext1 = await asyncValueProvider.GetLatestWithGraceOrNextAsync();
             await Task.Delay(200);
-            var getNext2 = await asyncValueProvider.GetNextAsync();
+            var getNext2 = await asyncValueProvider.GetLatestWithGraceOrNextAsync();
 
             // no new value provided, but we always get the latest one
             getNext1.Should().Be(getNext2);
@@ -282,14 +282,14 @@ namespace Bsii.Dotnet.Utils.Tests
         {
             // these are illegal
             Assert.Throws<ArgumentException>(
-                () => new AsyncValueSource<bool>(TimeSpan.Zero));
+                () => new GracefulAsyncValueSource<bool>(TimeSpan.Zero));
 
             Assert.Throws<ArgumentException>(
-                () => new AsyncValueSource<bool>(TimeSpan.FromSeconds(-1)));
+                () => new GracefulAsyncValueSource<bool>(TimeSpan.FromSeconds(-1)));
 
             // these are legal
-            _ = new AsyncValueSource<bool>(TimeSpan.FromSeconds(1));
-            _ = new AsyncValueSource<bool>(Timeout.InfiniteTimeSpan);
+            _ = new GracefulAsyncValueSource<bool>(TimeSpan.FromSeconds(1));
+            _ = new GracefulAsyncValueSource<bool>(Timeout.InfiniteTimeSpan);
         }
     }
 }
