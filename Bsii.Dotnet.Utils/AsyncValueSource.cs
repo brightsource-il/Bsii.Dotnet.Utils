@@ -45,7 +45,7 @@ namespace Bsii.Dotnet.Utils
 
         public Task<T> GetNextAsync()
         {
-            if (_gracePeriod.HasValue)
+            if (_gracePeriod.HasValue && _captured != default)
             {
                 if (_gracePeriod <= TimeSpan.Zero ||
                     _captured?.ValueTime + _gracePeriod.Value > DateTime.UtcNow)
