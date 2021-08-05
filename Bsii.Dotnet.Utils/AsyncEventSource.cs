@@ -12,8 +12,9 @@ namespace Bsii.Dotnet.Utils
 
         /// <summary>
         /// </summary>
-        /// <param name="gracePeriod">If positive, will signal new awaiters for so long since received.
-        /// Otherwise, latest available value will be provided without waiting.</param>
+        /// <param name="gracePeriod">If null, will block awaiters until next signal,</br>
+        /// If positive, will return to awaiters if latest signal was set for so long since received,</br>
+        /// If value is <see cref="System.Threading.Timeout.InfiniteTimeSpan">, will return without waiting (unless no signal was set).</param>
         public AsyncEventSource(TimeSpan? gracePeriod = default)
             => _signaler = new AsyncValueSource<bool>(gracePeriod);
 
