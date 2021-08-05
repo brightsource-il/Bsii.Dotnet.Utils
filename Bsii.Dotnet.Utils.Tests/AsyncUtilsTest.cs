@@ -203,8 +203,7 @@ namespace Bsii.Dotnet.Utils.Tests
             var value2 = new object();
             asyncValueSource.SetNext(value2);
             // we should be able to continue since because the next value was set since we were watching
-            var (n1, n2, n3) = await AsyncUtils.ResolveAll(getNext1, getNext2, getNext3)
-                .TimeoutAfter(TimeSpan.FromSeconds(1));
+            var (n1, n2, n3) = await AsyncUtils.ResolveAll(getNext1, getNext2, getNext3);
             n1.Should().Be(value2);
             n2.Should().Be(value2);
             n3.Should().Be(value2);
@@ -215,8 +214,7 @@ namespace Bsii.Dotnet.Utils.Tests
             getNext2 = asyncValueProvider.GetNextAsync();
             getNext3 = asyncValueProvider.GetNextAsync();
             // now don't wait => waiters should resolve instantly even though we didn't pass next value
-            (n1, n2, n3) = await AsyncUtils.ResolveAll(getNext1, getNext2, getNext3)
-                .TimeoutAfter(TimeSpan.FromSeconds(1));
+            (n1, n2, n3) = await AsyncUtils.ResolveAll(getNext1, getNext2, getNext3);
             n1.Should().Be(value3);
             n2.Should().Be(value3);
             n3.Should().Be(value3);
