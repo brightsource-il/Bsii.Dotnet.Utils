@@ -257,7 +257,7 @@ namespace Bsii.Dotnet.Utils.Tests
         [Fact]
         public async Task TestAsyncValueSourceWithLatestValue()
         {
-            AsyncValueSource<object> asyncValueSource = new(TimeSpan.Zero);
+            AsyncValueSource<object> asyncValueSource = new(Timeout.InfiniteTimeSpan);
             IAsyncValueProvider<object> asyncValueProvider = asyncValueSource;
 
             // no graceful value provision
@@ -275,6 +275,21 @@ namespace Bsii.Dotnet.Utils.Tests
 
             // no new value provided, but we always get the latest one
             getNext1.Should().Be(getNext2);
+        }
+
+        [Fact]
+        public void TestAsyncValueSourceWithInvalidGrace()
+        {
+            // these are illegal
+            Assert.Throws<ArgumentException>(
+                () => new AsyncValueSource<bool>(TimeSpan.Zero));
+
+            Assert.Throws<ArgumentException>(
+                () => new AsyncValueSource<bool>(TimeSpan.FromSeconds(-1)));
+
+            // these are legal
+            _ = new AsyncValueSource<bool>(TimeSpan.FromSeconds(1));
+            _ = new AsyncValueSource<bool>(Timeout.InfiniteTimeSpan);
         }
     }
 }

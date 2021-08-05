@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Bsii.Dotnet.Utils
@@ -34,7 +35,15 @@ namespace Bsii.Dotnet.Utils
         /// If positive, latest value will be provided to awaiters for so long since received,</br>
         /// If value is <see cref="System.Threading.Timeout.InfiniteTimeSpan"/>, latest available value will be provided without waiting (unless no latest value available).</param>
         public AsyncValueSource(TimeSpan? gracePeriod = default)
-            => _gracePeriod = gracePeriod;
+        {
+            if (gracePeriod.HasValue &&
+                gracePeriod <= TimeSpan.Zero &&
+                gracePeriod != Timeout.InfiniteTimeSpan)
+            {
+                throw new ArgumentException("gracePeriod must be positive or System.Threading.Timeout.InfiniteTimeSpan", nameof(gracePeriod));
+            }
+            _gracePeriod = gracePeriod;
+        }
 
         public void SetNext(T value)
         {
@@ -48,7 +57,7 @@ namespace Bsii.Dotnet.Utils
         {
             if (_gracePeriod.HasValue && _captured != default)
             {
-                if (_gracePeriod <= TimeSpan.Zero ||
+                if (_gracePeriod == Timeout.InfiniteTimeSpan ||
                     _captured?.ValueTime + _gracePeriod.Value > DateTime.UtcNow)
                 {
                     return _captured?.TaskCompletionSource.Task ?? _tcs.Task;
