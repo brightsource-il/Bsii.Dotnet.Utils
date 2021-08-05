@@ -30,8 +30,8 @@ namespace Bsii.Dotnet.Utils
 
         /// <summary>
         /// </summary>
-        /// <param name="gracePeriod">If positive, latest value will be provided to awaiters for so long since received.
-        /// Otherwise, latest available value will be provided without waiting.</param>
+        /// <param name="gracePeriod">If null, will block awaiters until next value provided,</br>If positive, latest value will be provided to awaiters for so long since received,</br>
+        /// If value is <see cref="System.Threading.Timeout.Infinite">, latest available value will be provided without waiting (unless no latest value available).</param>
         public AsyncValueSource(TimeSpan? gracePeriod = default)
             => _gracePeriod = gracePeriod;
 
