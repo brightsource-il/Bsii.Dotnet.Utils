@@ -40,7 +40,7 @@ namespace Bsii.Dotnet.Utils
                 gracePeriod <= TimeSpan.Zero &&
                 gracePeriod != Timeout.InfiniteTimeSpan)
             {
-                throw new ArgumentException("gracePeriod must be positive or System.Threading.Timeout.InfiniteTimeSpan", nameof(gracePeriod));
+                throw new ArgumentException($"{nameof(gracePeriod)} must be positive or System.Threading.Timeout.InfiniteTimeSpan", nameof(gracePeriod));
             }
             _gracePeriod = gracePeriod;
         }
@@ -55,12 +55,13 @@ namespace Bsii.Dotnet.Utils
 
         public Task<T> GetNextAsync()
         {
-            if (_gracePeriod.HasValue && _captured != default)
+            var captured = _captured;
+            if (_gracePeriod.HasValue && captured != default)
             {
                 if (_gracePeriod == Timeout.InfiniteTimeSpan ||
-                    _captured?.ValueTime + _gracePeriod.Value > DateTime.UtcNow)
+                    captured.ValueTime + _gracePeriod.Value > DateTime.UtcNow)
                 {
-                    return _captured?.TaskCompletionSource.Task ?? _tcs.Task;
+                    return captured.TaskCompletionSource.Task ?? _tcs.Task;
                 }
                 else
                 {
