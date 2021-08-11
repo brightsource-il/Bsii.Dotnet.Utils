@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -221,14 +222,9 @@ namespace Bsii.Dotnet.Utils.Reflection
         /// <returns></returns>
         public static Dictionary<TKey, Dictionary<string, string>> FlattenDictionary<TKey, TValue>(Dictionary<TKey, TValue> dict, string delimiter = ".", bool shortNames = false)
         {
-            var dic = new Dictionary<TKey, Dictionary<string, string>>(dict.Count);
-            foreach (var kvp in dict)
-            {
-                var hidRes = FlattenObjectToDictionary<TKey>
-                    (kvp.Value, "", new Dictionary<string, string>(), delimiter, shortNames, new Dictionary<string, PropertyInfo[]>());
-                dic.Add(kvp.Key, hidRes);
-            }
-            return dic;
+            return dict.ToDictionary(x => x.Key, x => FlattenObjectToDictionary<TKey>
+                (x.Value, "", new Dictionary<string, string>(), delimiter, shortNames, new Dictionary<string, PropertyInfo[]>()));
+
         }
 
         private static Dictionary<string, string> FlattenObjectToDictionary<TKey>(object obj, string prefix,
@@ -266,9 +262,7 @@ namespace Bsii.Dotnet.Utils.Reflection
                 var name = shortNames ? property.Name : $"{newPrefix}{property.Name}";
                 var camelCaseName = Char.ToLowerInvariant(name[0]) + name.Substring(1);
                 dic[camelCaseName] = propValue.ToString();
-                return dic;
             }
-
             return dic;
         }
     }
