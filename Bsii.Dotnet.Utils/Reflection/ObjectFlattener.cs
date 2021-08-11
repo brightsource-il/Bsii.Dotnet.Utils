@@ -224,20 +224,25 @@ namespace Bsii.Dotnet.Utils.Reflection
             var dic = new Dictionary<TKey, Dictionary<string, string>>(dict.Count);
             foreach (var kvp in dict)
             {
-                var hidRes = new Dictionary<string, string>();
-                FlattenObjectToDictionary(kvp.Value, "", hidRes, delimiter, shortNames, new Dictionary<string, PropertyInfo[]>());
+                var hidRes = FlattenObjectToDictionary<TKey>
+                    (kvp.Value, "", new Dictionary<string, string>(), delimiter, shortNames, new Dictionary<string, PropertyInfo[]>());
                 dic.Add(kvp.Key, hidRes);
             }
             return dic;
         }
 
-        private static void FlattenObjectToDictionary(object obj, string prefix, Dictionary<string, string> dic, string delimiter, bool shortNames, Dictionary<string, PropertyInfo[]> propertyDic)
+        private static Dictionary<string, string> FlattenObjectToDictionary<TKey>(object obj, string prefix,
+            Dictionary<string, string> dic, string delimiter, bool shortNames,
+            Dictionary<string, PropertyInfo[]> propertyDic)
         {
-            if (obj == null) return;
+            if (obj == null)
+            {
+                return dic;
+            }
             var objType = obj.GetType();
             if (!propertyDic.ContainsKey(prefix))
             {
-                propertyDic[prefix]=objType.GetProperties();
+                propertyDic[prefix] = objType.GetProperties();
             }
             var properties = propertyDic[prefix];
             var accessor = TypeAccessor.Create(objType);
@@ -246,23 +251,25 @@ namespace Bsii.Dotnet.Utils.Reflection
                 object propValue = accessor[obj, property.Name];
                 if (propValue == null)
                 {
-                    return;
+                    return dic;
                 }
 
                 var newPrefix = shortNames ? "" : prefix.Length == 0 ? prefix : prefix + delimiter;
 
                 if (property.PropertyType.Assembly == objType.Assembly && !property.PropertyType.IsEnum)
                 {
-                    FlattenObjectToDictionary(propValue, $"{newPrefix}{property.Name}", dic, delimiter, shortNames, propertyDic);
+                    return FlattenObjectToDictionary<TKey>(propValue, $"{newPrefix}{property.Name}", dic, delimiter,
+                        shortNames, propertyDic);
                 }
-                else
-                {
-                    //now we have a primitive
-                    var name = shortNames ? property.Name : $"{newPrefix}{property.Name}";
-                    var camelCaseName = Char.ToLowerInvariant(name[0]) + name.Substring(1);
-                    dic[camelCaseName] = propValue.ToString();
-                }
+
+                //now we have a primitive
+                var name = shortNames ? property.Name : $"{newPrefix}{property.Name}";
+                var camelCaseName = Char.ToLowerInvariant(name[0]) + name.Substring(1);
+                dic[camelCaseName] = propValue.ToString();
+                return dic;
             }
+
+            return dic;
         }
     }
 }
