@@ -174,5 +174,87 @@ namespace Bsii.Dotnet.Utils.Tests
             await Task.WhenAll(awaiter1, awaiter2, awaiter3)
                     .TimeoutAfter(TimeSpan.FromMilliseconds(50));
         }
+
+        [Fact]
+        public async Task TestAsyncCachingValueSource()
+        {
+            AsyncCachingValueSource<object> asyncValueSource = new();
+            IAsyncCachingValueProvider<object> asyncValueProvider = asyncValueSource;
+
+            // no last value
+            await Assert.ThrowsAsync<TimeoutException>(async () =>
+                await asyncValueProvider.GetAsync(
+                    TimeSpan.FromMilliseconds(50),
+                    timeOut: TimeSpan.FromMilliseconds(50)));
+
+            var expectedValue = new object();
+            asyncValueSource.SetNext(expectedValue);
+            // check last value can be read:
+            var lastValue = await asyncValueProvider.GetAsync(TimeSpan.FromMilliseconds(100));
+            lastValue.Should().Be(expectedValue);
+            await Task.Delay(200);
+            // check last value can be read if max age not passed:
+            lastValue = await asyncValueProvider.GetAsync(TimeSpan.FromMilliseconds(300));
+            lastValue.Should().Be(expectedValue);
+            // check last value is ignored if max age passed:
+            await Assert.ThrowsAsync<TimeoutException>(async () =>
+                await asyncValueProvider.GetAsync(
+                    TimeSpan.FromMilliseconds(100),
+                    timeOut: TimeSpan.FromMilliseconds(50)));
+            // try to get a future value using 3 different tasks:
+            var timeOut = TimeSpan.FromMilliseconds(500);
+            var getNext1 = asyncValueProvider.GetAsync(TimeSpan.Zero, timeOut).AsTask();
+            var getNext2 = asyncValueProvider.GetAsync(TimeSpan.Zero, timeOut).AsTask();
+            var getNext3 = asyncValueProvider.GetAsync(TimeSpan.Zero, timeOut).AsTask();
+            // we should be blocked because we are watching **next** value which isn't set yet...
+            await Assert.ThrowsAsync<TimeoutException>(() =>
+                Task.WhenAll(getNext1, getNext2, getNext3)
+                    .TimeoutAfter(TimeSpan.FromMilliseconds(50)));
+            var expectedValue2 = new object();
+            asyncValueSource.SetNext(expectedValue2);
+            // we should be able to continue since because the next value was set since we were watching
+            var (n1, n2, n3) = await AsyncUtils.ResolveAll(getNext1, getNext2, getNext3);
+            n1.Should().Be(expectedValue2);
+            n2.Should().Be(expectedValue2);
+            n3.Should().Be(expectedValue2);
+        }
+
+
+
+        [Fact]
+        public async Task TestAsyncCachingEventSource()
+        {
+            AsyncCachingEventSource asyncEventSource = new();
+            IAsyncCachingEventProvider asyncEventProvider = asyncEventSource;
+            // no last event
+            await Assert.ThrowsAsync<TimeoutException>(async () =>
+                await asyncEventProvider.WaitAsync(
+                    TimeSpan.FromMilliseconds(50),
+                    timeOut: TimeSpan.FromMilliseconds(50)));
+
+            asyncEventSource.Signal();
+            // check last event received:
+            await asyncEventProvider.WaitAsync(TimeSpan.FromMilliseconds(100));
+            await Task.Delay(200);
+            // check last event can be awaited if max age not passed:
+            await asyncEventProvider.WaitAsync(TimeSpan.FromMilliseconds(300));
+            // check last event is ignored if max age passed:
+            await Assert.ThrowsAsync<TimeoutException>(async () =>
+                await asyncEventProvider.WaitAsync(
+                    TimeSpan.FromMilliseconds(100),
+                    timeOut: TimeSpan.FromMilliseconds(50)));
+            // try to get a future event using 3 different tasks:
+            var timeOut = TimeSpan.FromMilliseconds(500);
+            var getNext1 = asyncEventProvider.WaitAsync(TimeSpan.Zero, timeOut).AsTask();
+            var getNext2 = asyncEventProvider.WaitAsync(TimeSpan.Zero, timeOut).AsTask();
+            var getNext3 = asyncEventProvider.WaitAsync(TimeSpan.Zero, timeOut).AsTask();
+            // we should be blocked because we are watching **next** event which isn't set yet...
+            await Assert.ThrowsAsync<TimeoutException>(() =>
+                Task.WhenAll(getNext1, getNext2, getNext3)
+                    .TimeoutAfter(TimeSpan.FromMilliseconds(50)));
+            asyncEventSource.Signal();
+            // we should be able to continue since because the next value was set since we were watching
+            await Task.WhenAll(getNext1, getNext2, getNext3);
+        }
     }
 }
